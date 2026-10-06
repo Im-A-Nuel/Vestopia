@@ -23,3 +23,5 @@ export const POLL_INTERVAL_MS = 2000;
 export const MOCK_LATENCY_MS = 280;
 
 export const BANNER_DURATION_MS = 4200;
+
+export const DIALOGUE_TIMEOUT_MS = 9000;

@@ -4,6 +4,8 @@ import type { LatestEvent, MarketSnapshot, PlayerLedger } from "@/types";
 const PLAYERS_KEY = "vestopia.mock.players";
 const MARKET_KEY = "vestopia.mock.market";
 const EVENT_KEY = "vestopia.mock.event";
+const EVENT_LOG_KEY = "vestopia.mock.eventlog";
+const EVENT_LOG_LIMIT = 10;
 
 const readJson = <T>(key: string, fallback: T): T => {
   if (typeof window === "undefined") return fallback;
@@ -25,7 +27,7 @@ const writeJson = (key: string, value: unknown): void => {
 
 export const clearMockData = (): void => {
   try {
-    [PLAYERS_KEY, MARKET_KEY, EVENT_KEY].forEach((key) => window.localStorage.removeItem(key));
+    [PLAYERS_KEY, MARKET_KEY, EVENT_KEY, EVENT_LOG_KEY].forEach((key) => window.localStorage.removeItem(key));
   } catch {
     return;
   }
@@ -45,6 +47,7 @@ export const loadPlayer = (address: string): PlayerLedger => {
         shares: { ...empty.shares, ...stored.shares },
         collateral: { ...empty.collateral, ...stored.collateral },
         pending: { ...empty.pending, ...stored.pending },
+        costBasis: { ...empty.costBasis, ...stored.costBasis },
       }
     : empty;
 };
@@ -64,4 +67,9 @@ export const saveMarket = (market: MarketSnapshot): void => writeJson(MARKET_KEY
 
 export const loadLatestEvent = (): LatestEvent | null => readJson<LatestEvent | null>(EVENT_KEY, null);
 
-export const saveLatestEvent = (event: LatestEvent): void => writeJson(EVENT_KEY, event);
+export const loadEventLog = (): LatestEvent[] => readJson<LatestEvent[]>(EVENT_LOG_KEY, []);
+
+export const saveLatestEvent = (event: LatestEvent): void => {
+  writeJson(EVENT_KEY, event);
+  writeJson(EVENT_LOG_KEY, [event, ...loadEventLog()].slice(0, EVENT_LOG_LIMIT));
+};

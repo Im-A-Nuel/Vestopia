@@ -27,6 +27,7 @@ export class WeatherLayer {
   private readonly flash: Phaser.GameObjects.Rectangle;
   private readonly clouds: Phaser.GameObjects.Image[];
   private readonly rain: Phaser.GameObjects.Particles.ParticleEmitter;
+  private readonly rainbow: Phaser.GameObjects.Image;
   private lightningTimer: Phaser.Time.TimerEvent | null = null;
   private current: WeatherState | null = null;
 
@@ -49,6 +50,12 @@ export class WeatherLayer {
     if (!prefersReducedMotion()) {
       this.clouds.forEach((cloud, index) => this.driftCloud(cloud, 38000 + index * 4000));
     }
+
+    this.rainbow = scene.add
+      .image(WORLD.width / 2, 150, TEXTURE.rainbow)
+      .setDepth(DEPTH.weather + 1)
+      .setScale(2.8)
+      .setAlpha(0);
 
     this.rain = scene.add
       .particles(0, -400, TEXTURE.rain, {
@@ -78,6 +85,8 @@ export class WeatherLayer {
       cloud.setTint(weather === "stormy" ? 0x59627a : 0xffffff);
     });
 
+    if (previous === "stormy" && weather !== "stormy" && animate) this.playRainbow();
+
     if (look.rain) {
       this.rain.start();
       this.scheduleLightning(animate && previous !== null);
@@ -85,6 +94,18 @@ export class WeatherLayer {
       this.rain.stop();
       this.stopLightning();
     }
+  }
+
+  private playRainbow(): void {
+    if (prefersReducedMotion()) return;
+    this.scene.tweens.add({
+      targets: this.rainbow,
+      alpha: { from: 0, to: 0.6 },
+      duration: 1500,
+      hold: 3500,
+      yoyo: true,
+      ease: "Sine.easeInOut",
+    });
   }
 
   destroy(): void {

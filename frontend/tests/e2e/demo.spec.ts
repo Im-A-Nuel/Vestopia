@@ -88,3 +88,25 @@ test("resets demo data from the Info panel", async ({ page }) => {
   await page.waitForURL("**/");
   await expect(page.getByRole("button", { name: "Start with Passkey" })).toBeVisible();
 });
+
+test("keeps the admin session across a reload and lists prices and events", async ({ page }) => {
+  await unlockAdmin(page);
+  await trigger(page, "Tech boom");
+  await page.reload();
+  await expect(page.getByText("Tech boom").first()).toBeVisible();
+  await expect(page.getByLabel("Admin password")).toHaveCount(0);
+  const nvidiaRow = page.getByRole("row", { name: /Nvidia/ });
+  await expect(nvidiaRow).toContainText("$175.00");
+  await expect(nvidiaRow).toContainText("+25.0%");
+  await page.getByRole("button", { name: "Lock admin panel" }).click();
+  await expect(page.getByLabel("Admin password")).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Admin password")).toBeVisible();
+});
+
+test("lore dialogues dismiss themselves while warnings stay", async ({ page }) => {
+  await startGame(page);
+  await buyShares(page, "Nvidia", 300);
+  await expect(page.getByText("Tech companies build the gadgets")).toBeVisible();
+  await expect(page.getByText("Tech companies build the gadgets")).toHaveCount(0, { timeout: 15000 });
+});

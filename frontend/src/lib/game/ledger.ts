@@ -10,6 +10,7 @@ export const createPlayerLedger = (): PlayerLedger => ({
   shares: createStockLedger(() => 0),
   collateral: createStockLedger(() => 0),
   pending: createStockLedger(() => 0),
+  costBasis: createStockLedger(() => 0),
   debt: 0,
 });
 

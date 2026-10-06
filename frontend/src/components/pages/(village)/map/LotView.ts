@@ -6,6 +6,8 @@ import { COLORS, DEPTH, HARVEST_STACK_THRESHOLDS, TEXTURE } from "./constants";
 import { burst, flashWhite, floatText, shakeCamera } from "./effects";
 import { onTap } from "./input";
 import type { LabelRegistry } from "./labels";
+import { prefersReducedMotion } from "./motion";
+import { SPECIAL_EFFECTS, type EffectSpec } from "./specialEffects";
 
 const levelScale = (level: LotLevel): number => (level === 0 ? 1 : LEVEL_SCALES[level]);
 
@@ -153,9 +155,20 @@ export class LotView {
     });
   }
 
-  celebrateSell(): void {
+  celebrateSell(profit: number): void {
+    if (profit > 0.005) {
+      this.floatChange(`Profit +${formatCoins(profit)} Coins`, COLORS.gold);
+      burst(this.scene, this.x, this.y - 20, {
+        tint: [0xf2c14e, 0xfbe39a],
+        texture: TEXTURE.coin,
+        count: 12,
+        gravityY: 200,
+        speed: { min: 80, max: 180 },
+      });
+      return;
+    }
     this.floatChange("Sold", COLORS.neutral);
-    burst(this.scene, this.x, this.y - 20, { tint: [0xcfd6e0, 0xf2c14e], count: 10, speed: { min: 60, max: 140 } });
+    burst(this.scene, this.x, this.y - 20, { tint: [0xcfd6e0, 0x9aa0ad], count: 10, speed: { min: 60, max: 140 } });
   }
 
   reactToPrice(percent: number): void {
@@ -173,6 +186,47 @@ export class LotView {
     }
     if (Math.abs(percent) > 20) {
       shakeCamera(this.scene, 260, 0.0025);
+      this.playSpecial(SPECIAL_EFFECTS[this.stock.id][rising ? "up" : "down"]);
+    }
+  }
+
+  private playSpecial(effect: EffectSpec): void {
+    burst(this.scene, this.x, this.y - 30, {
+      tint: effect.tint,
+      texture: effect.texture,
+      count: effect.count,
+      gravityY: effect.gravityY,
+      speed: effect.speed,
+      scale: effect.scale,
+      lifespan: 1400,
+    });
+    if (prefersReducedMotion() || !this.building.visible) return;
+    const target = this.building;
+    if (effect.pulse === "flicker") {
+      this.scene.tweens.add({ targets: target, alpha: 0.35, yoyo: true, repeat: 6, duration: 70 });
+    } else if (effect.pulse === "shake") {
+      this.scene.tweens.add({
+        targets: target,
+        x: this.x + 5,
+        yoyo: true,
+        repeat: 6,
+        duration: 45,
+        onComplete: () => target.setX(this.x),
+      });
+    } else if (effect.pulse === "bob") {
+      this.scene.tweens.add({
+        targets: target,
+        y: this.y - 6,
+        yoyo: true,
+        repeat: 3,
+        duration: 160,
+        onComplete: () => target.setY(this.y),
+      });
+    } else if (effect.pulse === "dim") {
+      target.setTint(0x777777);
+      this.scene.time.delayedCall(2200, () => {
+        if (target.active) target.clearTint();
+      });
     }
   }
 

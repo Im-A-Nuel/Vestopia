@@ -22,6 +22,7 @@ import type {
 } from "@/types";
 import {
   clearMockData,
+  loadEventLog,
   loadLatestEvent,
   loadMarket,
   loadPlayer,
@@ -165,6 +166,7 @@ export const mockGameService: GameService = {
       const shares = koinAmount / market.prices[stockId];
       ledger.koin = Math.max(0, ledger.koin - koinAmount);
       ledger.shares[stockId] += shares;
+      ledger.costBasis[stockId] += koinAmount;
       return success(
         `Bought ${formatShares(shares)} ${getStock(stockId).name} shares for ${formatCoins(koinAmount)} Coins.`,
       );
@@ -177,6 +179,9 @@ export const mockGameService: GameService = {
       const transfer = resolveTransfer(koinAmount, ledger.shares[stockId], market.prices[stockId]);
       if (!transfer) return koinAmount === "max" || isPositive(koinAmount) ? sharesError() : invalidAmount();
       if (transfer.shares <= 0) return invalidAmount();
+      const held = ledger.shares[stockId] + ledger.collateral[stockId];
+      const keptFraction = held > 0 ? Math.max(0, 1 - transfer.shares / held) : 0;
+      ledger.costBasis[stockId] = keptFraction < 1e-9 ? 0 : ledger.costBasis[stockId] * keptFraction;
       ledger.shares[stockId] = settle(ledger.shares[stockId] - transfer.shares);
       ledger.koin += transfer.koin;
       return success(
@@ -255,6 +260,14 @@ export const mockGameService: GameService = {
 
   async getLatestEvent() {
     return loadLatestEvent();
+  },
+
+  async getEventLog() {
+    return loadEventLog();
+  },
+
+  async getMarket() {
+    return loadMarket();
   },
 
   async resetDemo() {
