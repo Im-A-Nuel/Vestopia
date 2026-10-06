@@ -1,5 +1,9 @@
 import type { HarvestKind, SectorId, StockId } from "@/types";
 
+export const GRASS_CSS = "#7BB661";
+
+export const HEX = { grass: 0x7bb661, storm: 0x1d2540, white: 0xffffff } as const;
+
 export const LOT_OFFSET_X = 128;
 
 export const MIN_ZOOM = 0.62;

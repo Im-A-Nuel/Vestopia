@@ -58,8 +58,13 @@ export function LandingScreen() {
               </button>
             </div>
           ) : (
-            <button type="button" className="btn btn-primary self-start" disabled={loading} onClick={() => void start()}>
-              {loading ? "Opening passkey..." : "Start with Passkey"}
+            <button
+              type="button"
+              className="btn btn-primary self-start"
+              disabled={loading}
+              onClick={() => void start()}
+            >
+              {loading ? "Signing in..." : "Start with Passkey"}
             </button>
           )}
           <p role={error ? "alert" : undefined} className="min-h-5 text-sm text-negative">
@@ -76,7 +81,10 @@ export function LandingScreen() {
           ))}
         </dl>
 
-        <p className="text-xs text-soft">{COPY.disclaimer}</p>
+        <div className="flex flex-col gap-1 text-xs text-soft">
+          <p>{COPY.demoNotice}</p>
+          <p>{COPY.disclaimer}</p>
+        </div>
       </section>
 
       <div className="overflow-hidden rounded-panel border border-line bg-muted">

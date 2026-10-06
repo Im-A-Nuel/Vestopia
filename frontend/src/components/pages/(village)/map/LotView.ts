@@ -3,8 +3,9 @@ import { LEVEL_SCALES, LOT_SIZE } from "@/config";
 import { formatCoins } from "@/lib";
 import type { LotLevel, StockConfig, StockView, VillageBridge } from "@/types";
 import { COLORS, DEPTH, HARVEST_STACK_THRESHOLDS, TEXTURE } from "./constants";
-import { burst, flashWhite, floatText } from "./effects";
+import { burst, flashWhite, floatText, shakeCamera } from "./effects";
 import { onTap } from "./input";
+import type { LabelRegistry } from "./labels";
 
 const levelScale = (level: LotLevel): number => (level === 0 ? 1 : LEVEL_SCALES[level]);
 
@@ -22,6 +23,7 @@ export class LotView {
 
   private readonly scene: Phaser.Scene;
   private readonly bridge: VillageBridge;
+  private readonly labels: LabelRegistry;
   private readonly building: Phaser.GameObjects.Image;
   private readonly available: Phaser.GameObjects.Image;
   private readonly availableLabel: Phaser.GameObjects.Text;
@@ -36,32 +38,53 @@ export class LotView {
   private stack = 0;
   private visibleLot = false;
 
-  constructor(scene: Phaser.Scene, bridge: VillageBridge, stock: StockConfig, x: number, y: number) {
+  constructor(
+    scene: Phaser.Scene,
+    bridge: VillageBridge,
+    labels: LabelRegistry,
+    stock: StockConfig,
+    x: number,
+    y: number,
+  ) {
     this.scene = scene;
     this.bridge = bridge;
+    this.labels = labels;
     this.stock = stock;
     this.x = x;
     this.y = y;
 
     this.available = scene.add.image(x, y, TEXTURE.available).setDepth(DEPTH.lot);
-    this.availableLabel = scene.add
-      .text(x, y - 36, "Available", { fontFamily: bridge.fontFamily, fontSize: "9px", color: COLORS.ink })
-      .setOrigin(0.5)
-      .setDepth(DEPTH.lot + 1);
+    this.availableLabel = labels.add(
+      scene.add
+        .text(x, y - 36, "Available", { fontFamily: bridge.fontFamily, fontSize: "10px", color: COLORS.ink })
+        .setOrigin(0.5)
+        .setDepth(DEPTH.lot + 1),
+    );
     this.building = scene.add.image(x, y, TEXTURE.lot(stock.id)).setDepth(DEPTH.lot).setVisible(false);
-    this.decorTwo = scene.add.image(x, y, TEXTURE.decorTwo).setDepth(DEPTH.lot + 1).setVisible(false);
-    this.decorThree = scene.add.image(x, y, TEXTURE.decorThree).setDepth(DEPTH.lot + 1).setVisible(false);
-    this.lockBadge = scene.add.image(x + 68, y - 56, TEXTURE.lockBadge).setDepth(DEPTH.lot + 2).setVisible(false);
-    this.tag = scene.add
-      .text(x, y + LOT_SIZE / 2 - 6, stock.ticker, {
-        fontFamily: bridge.fontFamily,
-        fontSize: "10px",
-        color: COLORS.white,
-        backgroundColor: COLORS.ink,
-        padding: { x: 6, y: 4 },
-      })
-      .setOrigin(0.5)
-      .setDepth(DEPTH.label);
+    this.decorTwo = scene.add
+      .image(x, y, TEXTURE.decorTwo)
+      .setDepth(DEPTH.lot + 1)
+      .setVisible(false);
+    this.decorThree = scene.add
+      .image(x, y, TEXTURE.decorThree)
+      .setDepth(DEPTH.lot + 1)
+      .setVisible(false);
+    this.lockBadge = scene.add
+      .image(x + 68, y - 56, TEXTURE.lockBadge)
+      .setDepth(DEPTH.lot + 2)
+      .setVisible(false);
+    this.tag = labels.add(
+      scene.add
+        .text(x, y + LOT_SIZE / 2 - 6, stock.ticker, {
+          fontFamily: bridge.fontFamily,
+          fontSize: "11px",
+          color: COLORS.white,
+          backgroundColor: COLORS.ink,
+          padding: { x: 6, y: 4 },
+        })
+        .setOrigin(0.5)
+        .setDepth(DEPTH.label),
+    );
 
     this.harvestItems = [0, 1, 2].map((index) => {
       const item = scene.add
@@ -72,7 +95,10 @@ export class LotView {
       onTap(item, () => this.bridge.harvest(stock.id));
       return item;
     });
-    this.tapHand = scene.add.image(x, y - 124, TEXTURE.tapHand).setDepth(DEPTH.harvest).setVisible(false);
+    this.tapHand = scene.add
+      .image(x, y - 124, TEXTURE.tapHand)
+      .setDepth(DEPTH.harvest)
+      .setVisible(false);
 
     this.hit = scene.add
       .zone(x, y, LOT_SIZE - 24, LOT_SIZE - 24)
@@ -109,7 +135,11 @@ export class LotView {
   }
 
   floatChange(text: string, color: string): void {
-    floatText(this.scene, this.x, this.y - 70, text, { fontFamily: this.bridge.fontFamily, color });
+    floatText(this.scene, this.x, this.y - 70, text, {
+      fontFamily: this.bridge.fontFamily,
+      color,
+      scale: this.labels.current,
+    });
   }
 
   celebrateBuy(delta: number): void {
@@ -142,7 +172,7 @@ export class LotView {
       });
     }
     if (Math.abs(percent) > 20) {
-      this.scene.cameras.main.shake(260, 0.0025);
+      shakeCamera(this.scene, 260, 0.0025);
     }
   }
 
@@ -152,10 +182,17 @@ export class LotView {
   }
 
   collectHarvest(amount: number): void {
-    burst(this.scene, this.x, this.y - 84, { tint: [0xf2c14e], texture: TEXTURE.coin, count: 10, gravityY: 240, speed: { min: 80, max: 200 } });
+    burst(this.scene, this.x, this.y - 84, {
+      tint: [0xf2c14e],
+      texture: TEXTURE.coin,
+      count: 10,
+      gravityY: 240,
+      speed: { min: 80, max: 200 },
+    });
     floatText(this.scene, this.x, this.y - 100, `+${formatCoins(amount)} Coins`, {
       fontFamily: this.bridge.fontFamily,
       color: COLORS.gold,
+      scale: this.labels.current,
     });
   }
 
@@ -214,7 +251,12 @@ export class LotView {
     if (previous > this.level && animate) {
       this.scene.tweens.add({ targets: this.building, alpha: 0.3, yoyo: true, repeat: 2, duration: 90 });
     }
-    this.scene.tweens.add({ targets: this.building, scale: targetScale, duration: animate ? 360 : 0, ease: "Back.easeOut" });
+    this.scene.tweens.add({
+      targets: this.building,
+      scale: targetScale,
+      duration: animate ? 360 : 0,
+      ease: "Back.easeOut",
+    });
   }
 
   private syncDecor(): void {
@@ -243,7 +285,14 @@ export class LotView {
     this.scene.tweens.killTweensOf(this.tapHand);
     this.tapHand.setY(this.y - 124);
     if (showHand) {
-      this.scene.tweens.add({ targets: this.tapHand, y: this.y - 112, yoyo: true, repeat: -1, duration: 600, ease: "Sine.easeInOut" });
+      this.scene.tweens.add({
+        targets: this.tapHand,
+        y: this.y - 112,
+        yoyo: true,
+        repeat: -1,
+        duration: 600,
+        ease: "Sine.easeInOut",
+      });
     }
   }
 }

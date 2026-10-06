@@ -23,6 +23,14 @@ const writeJson = (key: string, value: unknown): void => {
   }
 };
 
+export const clearMockData = (): void => {
+  try {
+    [PLAYERS_KEY, MARKET_KEY, EVENT_KEY].forEach((key) => window.localStorage.removeItem(key));
+  } catch {
+    return;
+  }
+};
+
 export const loadPlayers = (): Record<string, PlayerLedger> => readJson(PLAYERS_KEY, {});
 
 export const savePlayers = (players: Record<string, PlayerLedger>): void => writeJson(PLAYERS_KEY, players);

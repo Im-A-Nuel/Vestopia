@@ -10,11 +10,16 @@ export const useVillageSync = (): void => {
   useEffect(() => {
     if (!address) return;
     const tick = (): void => {
+      if (document.hidden) return;
       void useGameStore.getState().refresh();
       void useEventStore.getState().refresh();
     };
     tick();
     const interval = window.setInterval(tick, POLL_INTERVAL_MS);
-    return () => window.clearInterval(interval);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", tick);
+    };
   }, [address]);
 };

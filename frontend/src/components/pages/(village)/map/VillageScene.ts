@@ -2,10 +2,12 @@ import Phaser from "phaser";
 import { ASSETS, SECTORS, STOCKS, WORLD } from "@/config";
 import { diffPlayers } from "@/lib";
 import type { PlayerView, SectorId, StockId, VillageBridge } from "@/types";
-import { BUILDING_POSITIONS, COLORS, DEPTH, MIN_ZOOM, TEXTURE } from "./constants";
+import { BUILDING_POSITIONS, COLORS, DEPTH, HEX, MIN_ZOOM, TEXTURE } from "./constants";
 import { DistrictView } from "./DistrictView";
+import { flyCoins, hudPoint } from "./effects";
 import type { LotView } from "./LotView";
 import { onTap } from "./input";
+import { LabelRegistry } from "./labels";
 import { WeatherLayer } from "./WeatherLayer";
 
 interface SvgEntry {
@@ -47,6 +49,7 @@ export class VillageScene extends Phaser.Scene {
   private readonly bridge: VillageBridge;
   private readonly districts = new Map<SectorId, DistrictView>();
   private readonly lots = new Map<StockId, LotView>();
+  private readonly labels = new LabelRegistry();
   private weather: WeatherLayer | null = null;
   private unsubscribe: (() => void) | null = null;
   private center = { x: WORLD.width / 2, y: WORLD.height / 2 };
@@ -58,6 +61,7 @@ export class VillageScene extends Phaser.Scene {
   }
 
   preload(): void {
+    this.load.on("loaderror", () => this.bridge.reportError());
     const loaded = new Set<string>();
     buildManifest().forEach(({ key, url, width, height }) => {
       if (loaded.has(key)) return;
@@ -67,13 +71,13 @@ export class VillageScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.add.rectangle(WORLD.width / 2, WORLD.height / 2, 8000, 6000, 0x7bb661).setDepth(DEPTH.base - 1);
+    this.add.rectangle(WORLD.width / 2, WORLD.height / 2, 8000, 6000, HEX.grass).setDepth(DEPTH.base - 1);
     this.add.image(WORLD.width / 2, WORLD.height / 2, TEXTURE.base).setDepth(DEPTH.base);
     this.createBuildings();
     this.setUpCamera();
 
     SECTORS.forEach((sector) => {
-      const district = new DistrictView(this, this.bridge, sector);
+      const district = new DistrictView(this, this.bridge, this.labels, sector);
       this.districts.set(sector.id, district);
       district.lots.forEach((lot) => this.lots.set(lot.stock.id, lot));
     });
@@ -106,16 +110,18 @@ export class VillageScene extends Phaser.Scene {
         this.clearTint();
       });
     onTap(image, onSelect);
-    this.add
-      .text(position.x, position.y + 78, label, {
-        fontFamily: this.bridge.fontFamily,
-        fontSize: "10px",
-        color: COLORS.white,
-        backgroundColor: COLORS.ink,
-        padding: { x: 6, y: 4 },
-      })
-      .setOrigin(0.5)
-      .setDepth(DEPTH.label);
+    this.labels.add(
+      this.add
+        .text(position.x, position.y + 78, label, {
+          fontFamily: this.bridge.fontFamily,
+          fontSize: "11px",
+          color: COLORS.white,
+          backgroundColor: COLORS.ink,
+          padding: { x: 6, y: 4 },
+        })
+        .setOrigin(0.5)
+        .setDepth(DEPTH.label),
+    );
   }
 
   private setUpCamera(): void {
@@ -134,6 +140,7 @@ export class VillageScene extends Phaser.Scene {
     const camera = this.cameras.main;
     const fit = Math.min(this.scale.width / WORLD.width, this.scale.height / WORLD.height);
     camera.setZoom(Math.max(fit, MIN_ZOOM));
+    this.labels.update(camera.zoom);
     this.canPan = camera.zoom > fit + 0.001;
     this.center = { x: WORLD.width / 2, y: WORLD.height / 2 };
     this.clampCenter();
@@ -144,9 +151,13 @@ export class VillageScene extends Phaser.Scene {
     const halfWidth = this.scale.width / (2 * camera.zoom);
     const halfHeight = this.scale.height / (2 * camera.zoom);
     this.center.x =
-      halfWidth * 2 >= WORLD.width ? WORLD.width / 2 : Phaser.Math.Clamp(this.center.x, halfWidth, WORLD.width - halfWidth);
+      halfWidth * 2 >= WORLD.width
+        ? WORLD.width / 2
+        : Phaser.Math.Clamp(this.center.x, halfWidth, WORLD.width - halfWidth);
     this.center.y =
-      halfHeight * 2 >= WORLD.height ? WORLD.height / 2 : Phaser.Math.Clamp(this.center.y, halfHeight, WORLD.height - halfHeight);
+      halfHeight * 2 >= WORLD.height
+        ? WORLD.height / 2
+        : Phaser.Math.Clamp(this.center.y, halfHeight, WORLD.height - halfHeight);
     camera.centerOn(this.center.x, this.center.y);
   }
 
@@ -158,11 +169,25 @@ export class VillageScene extends Phaser.Scene {
       if (change.type === "price") this.lots.get(change.stockId)?.reactToPrice(change.percent);
       if (change.type === "value") {
         const lot = this.lots.get(change.stockId);
-        if (change.delta > 0) lot?.celebrateBuy(change.delta);
-        else lot?.celebrateSell();
+        if (change.delta > 0) {
+          lot?.celebrateBuy(change.delta);
+          if (lot) flyCoins(this, hudPoint(this), lot);
+        } else {
+          lot?.celebrateSell();
+          if (lot) flyCoins(this, lot, hudPoint(this));
+        }
+      }
+      if (change.type === "debt") {
+        const bank = BUILDING_POSITIONS.bank;
+        if (change.delta > 0) flyCoins(this, bank, hudPoint(this));
+        else flyCoins(this, hudPoint(this), bank);
       }
       if (change.type === "level" && change.to > change.from) this.lots.get(change.stockId)?.celebrateLevel(change.to);
-      if (change.type === "harvest-collected") this.lots.get(change.stockId)?.collectHarvest(change.amount);
+      if (change.type === "harvest-collected") {
+        const lot = this.lots.get(change.stockId);
+        lot?.collectHarvest(change.amount);
+        if (lot) flyCoins(this, { x: lot.x, y: lot.y - 84 }, hudPoint(this), 8);
+      }
     });
   }
 

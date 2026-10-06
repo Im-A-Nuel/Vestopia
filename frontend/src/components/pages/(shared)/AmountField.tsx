@@ -16,7 +16,15 @@ const DEFAULT_FRACTIONS = [0.25, 0.5, 1] as const;
 
 const toInputValue = (amount: number): string => (amount > 0 ? String(Math.floor(amount * 100) / 100) : "");
 
-export function AmountField({ label, value, onChange, max, hint, error, quickFractions = DEFAULT_FRACTIONS }: AmountFieldProps) {
+export function AmountField({
+  label,
+  value,
+  onChange,
+  max,
+  hint,
+  error,
+  quickFractions = DEFAULT_FRACTIONS,
+}: AmountFieldProps) {
   const inputId = useId();
   const messageId = useId();
 
@@ -43,7 +51,7 @@ export function AmountField({ label, value, onChange, max, hint, error, quickFra
           <button
             key={fraction}
             type="button"
-            className="btn btn-secondary !min-h-9 !px-3 !text-sm"
+            className="btn btn-secondary btn-chip"
             disabled={max <= 0}
             onClick={() => onChange(toInputValue(max * fraction))}
           >
@@ -51,7 +59,11 @@ export function AmountField({ label, value, onChange, max, hint, error, quickFra
           </button>
         ))}
       </div>
-      <p id={messageId} role={error ? "alert" : undefined} className={`min-h-5 text-sm ${error ? "text-negative" : "text-soft"}`}>
+      <p
+        id={messageId}
+        role={error ? "alert" : undefined}
+        className={`min-h-5 text-sm ${error ? "text-negative" : "text-soft"}`}
+      >
         {error ?? hint ?? ""}
       </p>
     </div>

@@ -2,8 +2,7 @@ import type { HarvestKind, NpcId, SectorId, StockId, WeatherState } from "@/type
 
 export const ASSET_EXTENSION = "svg";
 
-const assetPath = (folder: string, name: string): string =>
-  `/assets/${folder}/${name}.${ASSET_EXTENSION}`;
+const assetPath = (folder: string, name: string): string => `/assets/${folder}/${name}.${ASSET_EXTENSION}`;
 
 export const ASSETS = {
   map: { base: assetPath("map", "village-base") },

@@ -23,13 +23,7 @@ export interface ActionResult {
   code?: ActionErrorCode;
 }
 
-export type MarketEventId =
-  | "tech_boom"
-  | "gold_crash"
-  | "drought"
-  | "holiday_sale"
-  | "reset"
-  | "harvest_day";
+export type MarketEventId = "tech_boom" | "gold_crash" | "drought" | "holiday_sale" | "reset" | "harvest_day";
 
 export interface MarketEventPreset {
   id: MarketEventId;
@@ -60,4 +54,5 @@ export interface GameService {
   harvestAll(address: string): Promise<ActionResult>;
   triggerEvent(eventId: MarketEventId): Promise<ActionResult>;
   getLatestEvent(): Promise<LatestEvent | null>;
+  resetDemo(): Promise<ActionResult>;
 }

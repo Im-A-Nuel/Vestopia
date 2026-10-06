@@ -17,7 +17,11 @@ export function EventBanner() {
   if (!banner) return null;
 
   return (
-    <div key={banner.id} role="status" className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-4 pt-3">
+    <div
+      key={banner.id}
+      role="status"
+      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-4 pt-3"
+    >
       <p className="animate-banner-drop max-w-xl rounded-control bg-ink px-5 py-3 text-center text-sm font-bold text-white">
         {banner.text}
       </p>

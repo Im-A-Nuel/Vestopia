@@ -1,14 +1,15 @@
 "use client";
 
-import { ASSETS, SECTOR_UNLOCK_VALUE, getSector, getStocksBySector } from "@/config";
-import { formatCoins, formatPrice, formatShares, getNextLevelTarget } from "@/lib";
+import { ASSETS, COPY, SECTOR_UNLOCK_VALUE, getSector, getStocksBySector } from "@/config";
+import { formatCoins, formatPrice, formatRate, formatShares, getNextLevelTarget } from "@/lib";
 import { useGameStore, useUiStore } from "@/stores";
 import type { StockView } from "@/types";
-import { GameImage, Meter, Modal, NpcSpeech, Stat } from "@/components/pages/(shared)";
+import { GameImage, Hint, Meter, Modal, NpcSpeech, Stat } from "@/components/pages/(shared)";
 
 interface LotCardProps {
   name: string;
   ticker: string;
+  dividendRate: number;
   stockId: StockView["id"];
   view: StockView;
   busy: boolean;
@@ -16,7 +17,7 @@ interface LotCardProps {
   onBuy: () => void;
 }
 
-function LotCard({ name, ticker, stockId, view, busy, onHarvest, onBuy }: LotCardProps) {
+function LotCard({ name, ticker, dividendRate, stockId, view, busy, onHarvest, onBuy }: LotCardProps) {
   const target = getNextLevelTarget(view.level);
   const nextLevel = view.level + 1;
 
@@ -46,6 +47,7 @@ function LotCard({ name, ticker, stockId, view, busy, onHarvest, onBuy }: LotCar
             <Stat label="Value" value={formatCoins(view.value)} />
             <Stat label="In collateral" value={formatShares(view.collateralShares)} />
           </dl>
+          <p className="text-xs text-soft">Pays about {formatRate(dividendRate)} of its value on each Harvest Day.</p>
           {target ? (
             <Meter
               value={view.value}
@@ -67,7 +69,7 @@ function LotCard({ name, ticker, stockId, view, busy, onHarvest, onBuy }: LotCar
   );
 }
 
-export default function DistrictPanel() {
+export function DistrictPanel() {
   const player = useGameStore((state) => state.player);
   const busy = useGameStore((state) => state.busy);
   const harvest = useGameStore((state) => state.harvest);
@@ -88,7 +90,11 @@ export default function DistrictPanel() {
 
         <dl className="grid grid-cols-2 gap-3">
           <Stat label={`${sector.label} value`} value={`${formatCoins(sectorView.value)} Coins`} />
-          <Stat label="Status" value={sectorView.unlocked ? "Unlocked" : "Locked"} tone={sectorView.unlocked ? "positive" : "caution"} />
+          <Stat
+            label="Status"
+            value={sectorView.unlocked ? "Unlocked" : "Locked"}
+            tone={sectorView.unlocked ? "positive" : "caution"}
+          />
         </dl>
 
         {!sectorView.unlocked && (
@@ -99,6 +105,10 @@ export default function DistrictPanel() {
           />
         )}
 
+        <Hint summary="How dividends work">
+          <p>{COPY.explain.dividend}</p>
+        </Hint>
+
         <ul className="flex flex-col gap-3">
           {getStocksBySector(sectorId).map((stock) => {
             const view = player.stocks.find((item) => item.id === stock.id);
@@ -107,6 +117,7 @@ export default function DistrictPanel() {
                 key={stock.id}
                 name={stock.name}
                 ticker={stock.ticker}
+                dividendRate={stock.dividendRate}
                 stockId={stock.id}
                 view={view}
                 busy={busy}

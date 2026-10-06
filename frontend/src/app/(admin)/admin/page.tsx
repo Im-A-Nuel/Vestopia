@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AdminScreen } from "@/components/pages/(admin)";
 
 export const metadata: Metadata = {
-  title: "Admin | Vestopia",
+  title: "Admin",
   robots: { index: false, follow: false },
 };
 

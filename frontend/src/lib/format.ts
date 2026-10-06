@@ -15,13 +15,14 @@ export const formatPercent = (value: number): string => {
   return `${sign}${Math.abs(value).toFixed(1)}%`;
 };
 
+export const formatRate = (fraction: number): string => `${Number((fraction * 100).toFixed(1))}%`;
+
 export const formatSigned = (value: number): string => {
   const sign = value > 0 ? "+" : value < 0 ? "-" : "";
   return `${sign}${coinFormatter.format(Math.abs(value))}`;
 };
 
-export const formatHealth = (value: number): string =>
-  Number.isFinite(value) ? value.toFixed(2) : "No debt";
+export const formatHealth = (value: number): string => (Number.isFinite(value) ? value.toFixed(2) : "No debt");
 
 export const shortenAddress = (address: string): string =>
   address.length > 12 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;

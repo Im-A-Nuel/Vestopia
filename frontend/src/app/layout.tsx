@@ -16,14 +16,19 @@ const pixelFont = Press_Start_2P({
   display: "swap",
 });
 
+const DESCRIPTION = "Build your village from your portfolio. A simulated investing game for beginners.";
+
 export const metadata: Metadata = {
-  title: "Vestopia",
-  description: "Build your village from your portfolio. A simulated investing game for beginners.",
+  title: { default: "Vestopia", template: "%s | Vestopia" },
+  description: DESCRIPTION,
+  openGraph: { title: "Vestopia", description: DESCRIPTION, siteName: "Vestopia", type: "website" },
+  twitter: { card: "summary", title: "Vestopia", description: DESCRIPTION },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#faf8f4",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

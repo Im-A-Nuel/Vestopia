@@ -14,6 +14,8 @@ export const CLOUDY_HEALTH_FACTOR = 1.5;
 
 export const STORMY_HEALTH_FACTOR = 1.1;
 
+export const RISKY_BUFFER = 0.1;
+
 export const SHARE_DUST = 1e-9;
 
 export const POLL_INTERVAL_MS = 2000;

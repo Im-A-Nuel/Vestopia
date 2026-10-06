@@ -13,6 +13,8 @@
   --color-positive: #2e7d32;
   --color-negative: #b3261e;
   --color-caution: #8a5a00;
+  --color-grass: #7bb661;
+  --color-storm: #1d2540;
   --radius-control: 8px;
   --radius-panel: 14px;
 }
@@ -89,6 +91,23 @@ img {
   border: 1px solid var(--color-line);
   &:hover:not(:disabled) {
     background: var(--color-muted);
+  }
+}
+
+@utility btn-caution {
+  background: var(--color-caution);
+  color: #ffffff;
+  &:hover:not(:disabled) {
+    background: #6e4700;
+  }
+}
+
+@utility btn-chip {
+  min-height: 36px;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  @media (pointer: coarse) {
+    min-height: 44px;
   }
 }
 
@@ -196,6 +215,24 @@ img {
 
 @utility animate-sheet-rise {
   animation: sheet-rise 220ms ease-out both;
+}
+
+@keyframes delta-float {
+  0% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+}
+
+@utility animate-delta {
+  animation: delta-float 1.8s ease-out both;
 }
 
 @utility animate-attention {

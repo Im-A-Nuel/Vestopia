@@ -6,12 +6,7 @@ export type WeatherState = "sunny" | "cloudy" | "stormy";
 
 export type LotLevel = 0 | 1 | 2 | 3;
 
-export type HarvestKind =
-  | "chip"
-  | "gold-cart"
-  | "oil-barrel"
-  | "goods-crate"
-  | "harvest-basket";
+export type HarvestKind = "chip" | "gold-cart" | "oil-barrel" | "goods-crate" | "harvest-basket";
 
 export type NpcId = "guide" | "merchant" | "banker";
 
@@ -96,4 +91,5 @@ export type GameChange =
   | { type: "harvest-ready"; stockId: StockId; amount: number }
   | { type: "harvest-collected"; stockId: StockId; amount: number }
   | { type: "collateral"; stockId: StockId; locked: boolean }
-  | { type: "koin"; delta: number };
+  | { type: "koin"; delta: number }
+  | { type: "debt"; delta: number };
