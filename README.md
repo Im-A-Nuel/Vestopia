@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vestopia
 
-## Getting Started
+Vestopia is a simulated investing game for beginners. Players build a pixel-art village from a portfolio of simulated stocks: sectors open districts, companies become lots, dividends become harvests, and loans show up as weather.
 
-First, run the development server:
+All prices and assets are simulated for educational purposes. They are not real stocks and this is not investment advice.
+
+## Stack
+
+- Next.js (App Router), React, TypeScript, Tailwind CSS
+- Phaser for the village map
+- Zustand for state and data fetching
+- Sonner for toasts
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set `ADMIN_PASSWORD` in `.env.local`. The admin panel lives at `/admin`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `pnpm dev` starts the development server
+- `pnpm run build` creates the production build
+- `pnpm lint` runs ESLint
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app` routes: `(landing)`, `(village)/village`, `(admin)/admin`, `api/admin/verify`
+- `src/components/pages/(scope)` page components, each scope with its own `index.ts`
+- `src/config` stocks, sectors, rules, events, copy and asset paths
+- `src/lib` pure game logic: levels, loans, weather, player view, change diffing
+- `src/services` the game service. `mockGameService` runs the full rules in the browser
+- `src/stores` Zustand stores for session, game, events and UI
+- `src/types` shared types
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Data layer
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The frontend talks to a `GameService` interface. The current implementation is a browser mock that follows the game rules (1,000 Coins to start, 100 Coins to open a district, 50% max loan to value, weather from health factor, Harvest Day dividends). To connect real contracts, add an implementation of `GameService` and export it from `src/services/index.ts`.
 
-## Deploy on Vercel
+## Assets
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Placeholder SVG art lives in `public/assets`. Real art can replace it with the same file names. Change `ASSET_EXTENSION` in `src/config/assets.ts` when switching to PNG.
