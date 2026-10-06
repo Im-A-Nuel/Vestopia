@@ -23,6 +23,10 @@ const createBridge = (fontFamily: string, onError: () => void): VillageBridge =>
   openBank: () => useUiStore.getState().openBank(),
   harvest: (stockId) => void useGameStore.getState().harvest(stockId),
   reportError: onError,
+  subscribeZoom: (listener) =>
+    useUiStore.subscribe((state, previous) => {
+      if (state.zoomRequest && state.zoomRequest.id !== previous.zoomRequest?.id) listener(state.zoomRequest.action);
+    }),
 });
 
 export function VillageMap() {

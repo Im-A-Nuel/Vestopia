@@ -8,6 +8,10 @@ export const LOT_OFFSET_X = 128;
 
 export const MIN_ZOOM = 0.62;
 
+export const MAX_ZOOM = 1.8;
+
+export const ZOOM_STEP = 1.25;
+
 export const LOT_OFFSET_Y = 6;
 
 export const BUILDING_POSITIONS = {

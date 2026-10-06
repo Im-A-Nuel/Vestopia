@@ -1,8 +1,8 @@
 import Phaser from "phaser";
 import { ASSETS, SECTORS, STOCKS, WORLD } from "@/config";
 import { diffPlayers } from "@/lib";
-import type { GameChange, PlayerView, SectorId, StockId, VillageBridge } from "@/types";
-import { BUILDING_POSITIONS, COLORS, DEPTH, HEX, MIN_ZOOM, TEXTURE } from "./constants";
+import type { GameChange, PlayerView, SectorId, StockId, VillageBridge, ZoomAction } from "@/types";
+import { BUILDING_POSITIONS, COLORS, DEPTH, HEX, MAX_ZOOM, MIN_ZOOM, TEXTURE, ZOOM_STEP } from "./constants";
 import { DistrictView } from "./DistrictView";
 import { flyCoins, hudPoint } from "./effects";
 import { prefersReducedMotion } from "./motion";
@@ -52,6 +52,9 @@ export class VillageScene extends Phaser.Scene {
   private unsubscribe: (() => void) | null = null;
   private center = { x: WORLD.width / 2, y: WORLD.height / 2 };
   private canPan = false;
+  private fitZoom = 1;
+  private pinchDistance = 0;
+  private unsubscribeZoom: (() => void) | null = null;
 
   constructor(bridge: VillageBridge) {
     super("village");
@@ -87,6 +90,7 @@ export class VillageScene extends Phaser.Scene {
     if (player) this.apply(player, false);
 
     this.unsubscribe = this.bridge.subscribe((next, previous) => this.handleUpdate(next, previous));
+    this.unsubscribeZoom = this.bridge.subscribeZoom((action) => this.handleZoom(action));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.events.once(Phaser.Scenes.Events.DESTROY, () => this.cleanup());
   }
@@ -185,25 +189,52 @@ export class VillageScene extends Phaser.Scene {
   }
 
   private setUpCamera(): void {
+    this.input.addPointer(1);
     this.fitCamera();
     this.scale.on(Phaser.Scale.Events.RESIZE, () => this.fitCamera());
-    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
-      if (!pointer.isDown || !this.canPan) return;
-      const camera = this.cameras.main;
-      this.center.x -= (pointer.x - pointer.prevPosition.x) / camera.zoom;
-      this.center.y -= (pointer.y - pointer.prevPosition.y) / camera.zoom;
-      this.clampCenter();
+    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => this.handlePointerMove(pointer));
+    this.input.on("pointerup", () => {
+      this.pinchDistance = 0;
+    });
+    this.input.on("wheel", (_pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
+      this.setZoom(this.cameras.main.zoom * (dy < 0 ? ZOOM_STEP : 1 / ZOOM_STEP));
     });
   }
 
-  private fitCamera(): void {
+  private handlePointerMove(pointer: Phaser.Input.Pointer): void {
+    const first = this.input.pointer1;
+    const second = this.input.pointer2;
+    if (first.isDown && second.isDown) {
+      const distance = Phaser.Math.Distance.Between(first.x, first.y, second.x, second.y);
+      if (this.pinchDistance > 0 && distance > 0)
+        this.setZoom(this.cameras.main.zoom * (distance / this.pinchDistance));
+      this.pinchDistance = distance;
+      return;
+    }
+    if (!pointer.isDown || !this.canPan) return;
     const camera = this.cameras.main;
-    const fit = Math.min(this.scale.width / WORLD.width, this.scale.height / WORLD.height);
-    camera.setZoom(Math.max(fit, MIN_ZOOM));
-    this.labels.update(camera.zoom);
-    this.canPan = camera.zoom > fit + 0.001;
-    this.center = { x: WORLD.width / 2, y: WORLD.height / 2 };
+    this.center.x -= (pointer.x - pointer.prevPosition.x) / camera.zoom;
+    this.center.y -= (pointer.y - pointer.prevPosition.y) / camera.zoom;
     this.clampCenter();
+  }
+
+  private handleZoom(action: ZoomAction): void {
+    if (action === "reset") this.fitCamera();
+    else this.setZoom(this.cameras.main.zoom * (action === "in" ? ZOOM_STEP : 1 / ZOOM_STEP));
+  }
+
+  private setZoom(zoom: number): void {
+    const camera = this.cameras.main;
+    camera.setZoom(Phaser.Math.Clamp(zoom, this.fitZoom, MAX_ZOOM));
+    this.labels.update(camera.zoom);
+    this.canPan = camera.zoom > this.fitZoom + 0.001;
+    this.clampCenter();
+  }
+
+  private fitCamera(): void {
+    this.fitZoom = Math.min(this.scale.width / WORLD.width, this.scale.height / WORLD.height);
+    this.center = { x: WORLD.width / 2, y: WORLD.height / 2 };
+    this.setZoom(Math.max(this.fitZoom, MIN_ZOOM));
   }
 
   private clampCenter(): void {
@@ -262,6 +293,8 @@ export class VillageScene extends Phaser.Scene {
   private cleanup(): void {
     this.unsubscribe?.();
     this.unsubscribe = null;
+    this.unsubscribeZoom?.();
+    this.unsubscribeZoom = null;
     this.weather?.destroy();
   }
 }

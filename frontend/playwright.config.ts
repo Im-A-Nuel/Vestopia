@@ -18,8 +18,13 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
-      testIgnore: /mobile\.spec\.ts/,
+      testIgnore: /(mobile|responsive)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], channel: "chrome", viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: "responsive",
+      testMatch: /responsive\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
     },
     {
       name: "mobile",

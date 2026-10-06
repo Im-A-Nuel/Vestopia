@@ -19,9 +19,17 @@
   --radius-panel: 14px;
 }
 
+@custom-variant short (@media (max-height: 500px));
+
 html,
 body {
   height: 100%;
+  overscroll-behavior: none;
+}
+
+canvas {
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -52,6 +60,19 @@ button:disabled {
 
 img {
   image-rendering: pixelated;
+}
+
+@utility px-safe {
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+  padding-right: max(0.75rem, env(safe-area-inset-right));
+}
+
+@utility pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+@utility pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
 @utility btn {

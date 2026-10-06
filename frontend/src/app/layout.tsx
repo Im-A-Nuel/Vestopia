@@ -22,12 +22,15 @@ export const metadata: Metadata = {
   title: { default: "Vestopia", template: "%s | Vestopia" },
   description: DESCRIPTION,
   openGraph: { title: "Vestopia", description: DESCRIPTION, siteName: "Vestopia", type: "website" },
+  appleWebApp: { capable: true, title: "Vestopia", statusBarStyle: "default" },
+  icons: { icon: "/icon.svg", apple: "/icons/icon-192.png" },
   twitter: { card: "summary", title: "Vestopia", description: DESCRIPTION },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#faf8f4",
 };
 

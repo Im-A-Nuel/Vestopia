@@ -40,7 +40,7 @@ export function LandingScreen() {
   const returning = mounted && address !== null;
 
   return (
-    <main className="mx-auto grid min-h-dvh max-w-6xl items-center gap-8 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-12">
+    <main className="mx-auto grid min-h-dvh max-w-6xl items-center gap-8 px-4 py-8 short:grid-cols-2 short:gap-6 short:py-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-12">
       <section className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <h1 className="pixel-text text-3xl text-main sm:text-4xl">{APP_NAME}</h1>
@@ -87,7 +87,7 @@ export function LandingScreen() {
         </div>
       </section>
 
-      <div className="overflow-hidden rounded-panel border border-line bg-muted">
+      <div className="order-first overflow-hidden rounded-panel border border-line bg-muted short:order-last lg:order-last">
         <GameImage
           src={ASSETS.title}
           alt="A small village with a farmhouse in the middle, a tech office, a mine, a factory, and a farm around it."
