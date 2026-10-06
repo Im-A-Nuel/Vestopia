@@ -4,6 +4,7 @@ import { formatCoins } from "@/lib";
 import type { LotLevel, StockConfig, StockView, VillageBridge } from "@/types";
 import { COLORS, DEPTH, HARVEST_STACK_THRESHOLDS, TEXTURE } from "./constants";
 import { burst, flashWhite, floatText } from "./effects";
+import { onTap } from "./input";
 
 const levelScale = (level: LotLevel): number => (level === 0 ? 1 : LEVEL_SCALES[level]);
 
@@ -62,21 +63,22 @@ export class LotView {
       .setOrigin(0.5)
       .setDepth(DEPTH.label);
 
-    this.harvestItems = [0, 1, 2].map((index) =>
-      scene.add
+    this.harvestItems = [0, 1, 2].map((index) => {
+      const item = scene.add
         .image(x - 26 + index * 26, y - 84, TEXTURE.harvest(stock.harvest))
         .setDepth(DEPTH.harvest)
         .setVisible(false)
-        .setInteractive({ useHandCursor: true })
-        .on("pointerdown", () => this.bridge.harvest(stock.id)),
-    );
+        .setInteractive({ useHandCursor: true });
+      onTap(item, () => this.bridge.harvest(stock.id));
+      return item;
+    });
     this.tapHand = scene.add.image(x, y - 124, TEXTURE.tapHand).setDepth(DEPTH.harvest).setVisible(false);
 
     this.hit = scene.add
       .zone(x, y, LOT_SIZE - 24, LOT_SIZE - 24)
       .setDepth(DEPTH.lot + 3)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.handleSelect());
+      .setInteractive({ useHandCursor: true });
+    onTap(this.hit, () => this.handleSelect());
 
     this.parts().forEach((part) => (part as Phaser.GameObjects.Image).setAlpha(0));
     this.setInputEnabled(false);
@@ -86,12 +88,15 @@ export class LotView {
     if (visible === this.visibleLot) return;
     this.visibleLot = visible;
     this.setInputEnabled(visible);
+    const delay = animate && visible ? 500 : 0;
     this.scene.tweens.add({
       targets: this.parts(),
       alpha: visible ? 1 : 0,
       duration: animate ? (visible ? 700 : 900) : 0,
-      delay: animate && visible ? 500 : 0,
+      delay,
     });
+    if (visible) this.scene.time.delayedCall(delay, () => this.renderHarvest(this.stack, animate));
+    else this.renderHarvest(0, false);
   }
 
   apply(view: StockView, animate: boolean): void {
@@ -169,8 +174,6 @@ export class LotView {
       this.decorThree,
       this.lockBadge,
       this.tag,
-      this.tapHand,
-      ...this.harvestItems,
     ];
   }
 
@@ -222,21 +225,25 @@ export class LotView {
   private syncHarvest(next: number, animate: boolean): void {
     const previous = this.stack;
     this.stack = next;
+    this.renderHarvest(animate ? previous : next, animate);
+  }
+
+  private renderHarvest(previous: number, animate: boolean): void {
+    const next = this.stack;
     this.harvestItems.forEach((item, index) => {
-      const shown = index < next;
-      const wasShown = index < previous;
+      const shown = index < next && this.visibleLot;
       item.setVisible(shown);
-      if (shown && !wasShown && animate) {
+      if (shown && index >= previous && animate) {
         item.setScale(0.2);
         this.scene.tweens.add({ targets: item, scale: 1, duration: 420, delay: index * 140, ease: "Back.easeOut" });
       }
     });
-    this.tapHand.setVisible(next > 0);
+    const showHand = next > 0 && this.visibleLot;
+    this.tapHand.setVisible(showHand);
     this.scene.tweens.killTweensOf(this.tapHand);
-    if (next > 0) {
+    this.tapHand.setY(this.y - 124);
+    if (showHand) {
       this.scene.tweens.add({ targets: this.tapHand, y: this.y - 112, yoyo: true, repeat: -1, duration: 600, ease: "Sine.easeInOut" });
-    } else {
-      this.tapHand.setY(this.y - 124);
     }
   }
 }

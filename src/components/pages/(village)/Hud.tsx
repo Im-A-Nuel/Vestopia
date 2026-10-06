@@ -21,23 +21,24 @@ export function Hud() {
   if (!player) return null;
 
   return (
-    <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line bg-surface px-4 py-2">
-      <p className="pixel-text text-xs text-main">{APP_NAME}</p>
+    <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line bg-surface px-3 py-2 sm:px-4">
+      <p className="pixel-text hidden text-xs text-main sm:block">{APP_NAME}</p>
 
-      <dl className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-1">
+      <dl className="grid min-w-0 flex-1 grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-1">
         <div className="flex items-center gap-2">
-          <GameImage src={ASSETS.koinIcon} alt="" width={24} />
+          <GameImage src={ASSETS.koinIcon} alt="" width={24} className="hidden sm:block" />
           <div>
             <dt className="label-text">Coins</dt>
-            <dd className="tabular font-extrabold" aria-live="polite">
+            <dd className="tabular text-sm font-extrabold sm:text-base" aria-live="polite">
               {formatCoins(player.koin)}
             </dd>
           </div>
         </div>
         <div>
           <dt className="label-text">Portfolio Value</dt>
-          <dd className="tabular font-extrabold">
-            {formatCoins(player.portfolioValue)} <span className="text-xs font-semibold text-soft">Simulated</span>
+          <dd className="tabular text-sm font-extrabold sm:text-base">
+            {formatCoins(player.portfolioValue)}{" "}
+            <span className="hidden text-xs font-semibold text-soft sm:inline">Simulated</span>
           </dd>
         </div>
         <div className="flex items-center gap-2">
@@ -49,7 +50,7 @@ export function Hud() {
           />
           <div>
             <dt className="label-text">Weather</dt>
-            <dd className="font-extrabold">{WEATHER_LABELS[player.weather]}</dd>
+            <dd className="text-sm font-extrabold sm:text-base">{WEATHER_LABELS[player.weather]}</dd>
           </div>
         </div>
       </dl>

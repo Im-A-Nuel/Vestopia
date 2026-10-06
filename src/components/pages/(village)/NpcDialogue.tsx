@@ -21,11 +21,11 @@ export function NpcDialogue() {
   if (!dialogue || panel) return null;
 
   return (
-    <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center px-4 pb-4">
+    <div className="absolute inset-x-0 bottom-0 z-10 flex justify-start px-4 pb-4">
       <section
         key={dialogue.id}
         aria-live="polite"
-        className="panel animate-sheet-rise flex w-full max-w-xl flex-col gap-3 p-3 sm:flex-row sm:items-center"
+        className="panel animate-sheet-rise flex w-full max-w-xl items-center gap-2 p-2 sm:gap-3 sm:p-3"
       >
         <div className="flex-1">
           <NpcSpeech npc={dialogue.npc} text={dialogue.text} />

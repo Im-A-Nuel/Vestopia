@@ -2,6 +2,8 @@ import type { HarvestKind, SectorId, StockId } from "@/types";
 
 export const LOT_OFFSET_X = 128;
 
+export const MIN_ZOOM = 0.62;
+
 export const LOT_OFFSET_Y = 6;
 
 export const BUILDING_POSITIONS = {

@@ -3,6 +3,8 @@ import { WORLD } from "@/config";
 import type { WeatherState } from "@/types";
 import { DEPTH, TEXTURE } from "./constants";
 
+const COVER = { width: 8000, height: 6000 } as const;
+
 interface WeatherLook {
   shade: number;
   cloud: number;
@@ -29,10 +31,10 @@ export class WeatherLayer {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.shade = scene.add
-      .rectangle(WORLD.width / 2, WORLD.height / 2, WORLD.width, WORLD.height, 0x1d2540, 0)
+      .rectangle(WORLD.width / 2, WORLD.height / 2, COVER.width, COVER.height, 0x1d2540, 0)
       .setDepth(DEPTH.weather);
     this.flash = scene.add
-      .rectangle(WORLD.width / 2, WORLD.height / 2, WORLD.width, WORLD.height, 0xffffff, 0)
+      .rectangle(WORLD.width / 2, WORLD.height / 2, COVER.width, COVER.height, 0xffffff, 0)
       .setDepth(DEPTH.flash);
 
     this.clouds = Array.from({ length: CLOUD_COUNT }, (_, index) =>
@@ -45,12 +47,12 @@ export class WeatherLayer {
     this.clouds.forEach((cloud, index) => this.driftCloud(cloud, 38000 + index * 4000));
 
     this.rain = scene.add
-      .particles(0, -30, TEXTURE.rain, {
-        x: { min: 0, max: WORLD.width + 300 },
-        lifespan: 900,
+      .particles(0, -400, TEXTURE.rain, {
+        x: { min: -1400, max: WORLD.width + 1800 },
+        lifespan: 1700,
         speedY: { min: 900, max: 1100 },
         speedX: { min: -260, max: -200 },
-        quantity: 5,
+        quantity: 9,
         frequency: 24,
         alpha: { start: 0.75, end: 0.35 },
         rotate: 14,

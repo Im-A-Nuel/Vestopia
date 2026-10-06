@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${uiFont.variable} ${pixelFont.variable} h-full`}>
       <body className="min-h-full bg-default text-ink">
         {children}
-        <Toaster position="bottom-center" closeButton />
+        <Toaster position="bottom-right" offset={{ bottom: 72, right: 16 }} closeButton />
       </body>
     </html>
   );

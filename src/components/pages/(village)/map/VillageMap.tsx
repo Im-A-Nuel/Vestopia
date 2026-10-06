@@ -49,10 +49,10 @@ export default function VillageMap() {
   }, []);
 
   return (
-    <div className="relative h-full w-full bg-[#7BB661]">
+    <div className="absolute inset-0 overflow-hidden bg-[#7BB661]">
       <div
         ref={containerRef}
-        className="h-full w-full"
+        className="absolute inset-0"
         role="region"
         aria-label="Village map. Use the location buttons to open places with a keyboard."
       />

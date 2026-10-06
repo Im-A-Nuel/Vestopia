@@ -78,7 +78,34 @@ export default function ShopPanel() {
   };
 
   return (
-    <Modal title="Village Shop" onClose={closePanel}>
+    <Modal
+      title="Village Shop"
+      onClose={closePanel}
+      footer={
+      <form
+        className="flex flex-col gap-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canSubmit) void submit();
+        }}
+      >
+        <h3 className="text-base font-extrabold">{config.name}</h3>
+        <SegmentedControl
+          label="Trade type"
+          options={TRADE_OPTIONS}
+          value={mode}
+          onChange={(next) => {
+            setMode(next);
+            setAmount("");
+          }}
+        />
+        <AmountField label="Amount in Coins" value={amount} onChange={setAmount} max={available} error={error} hint={estimate} />
+        <button type="submit" className="btn btn-primary" disabled={!canSubmit}>
+          {busy ? "Working..." : `${mode === "buy" ? "Buy" : "Sell"} ${config.name}`}
+        </button>
+      </form>
+      }
+    >
       <div className="flex flex-col gap-4">
         <NpcSpeech npc="merchant" text={COPY.shopGreeting} />
 
@@ -122,28 +149,6 @@ export default function ShopPanel() {
           ))}
         </div>
 
-        <form
-          className="flex flex-col gap-3 border-t border-line pt-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (canSubmit) void submit();
-          }}
-        >
-          <h3 className="text-base font-extrabold">{config.name}</h3>
-          <SegmentedControl
-            label="Trade type"
-            options={TRADE_OPTIONS}
-            value={mode}
-            onChange={(next) => {
-              setMode(next);
-              setAmount("");
-            }}
-          />
-          <AmountField label="Amount in Coins" value={amount} onChange={setAmount} max={available} error={error} hint={estimate} />
-          <button type="submit" className="btn btn-primary" disabled={!canSubmit}>
-            {busy ? "Working..." : `${mode === "buy" ? "Buy" : "Sell"} ${config.name}`}
-          </button>
-        </form>
       </div>
     </Modal>
   );

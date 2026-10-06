@@ -3,6 +3,7 @@ import { getStocksBySector } from "@/config";
 import type { SectorConfig, VillageBridge } from "@/types";
 import { COLORS, DEPTH, LOT_OFFSET_X, LOT_OFFSET_Y, TEXTURE } from "./constants";
 import { burst } from "./effects";
+import { onTap } from "./input";
 import { LotView } from "./LotView";
 
 export class DistrictView {
@@ -30,7 +31,7 @@ export class DistrictView {
         padding: { x: 8, y: 5 },
       })
       .setOrigin(0.5)
-      .setDepth(DEPTH.label);
+      .setDepth(DEPTH.lock + 2);
 
     this.lots = getStocksBySector(sector.id).map(
       (stock, index) =>
@@ -42,8 +43,8 @@ export class DistrictView {
     this.hit = scene.add
       .zone(x, y, 512, 256)
       .setDepth(DEPTH.lock + 1)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => bridge.openDistrict(sector.id));
+      .setInteractive({ useHandCursor: true });
+    onTap(this.hit, () => bridge.openDistrict(sector.id));
   }
 
   setUnlocked(unlocked: boolean, animate: boolean): void {
