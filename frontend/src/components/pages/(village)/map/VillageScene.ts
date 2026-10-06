@@ -1,8 +1,8 @@
 import Phaser from "phaser";
 import { ASSETS, SECTORS, STOCKS, WORLD } from "@/config";
 import { diffPlayers } from "@/lib";
-import type { GameChange, PlayerView, SectorId, StockId, VillageBridge } from "@/types";
-import { BUILDING_POSITIONS, COLORS, DEPTH, HEX, MIN_ZOOM, TEXTURE } from "./constants";
+import type { GameChange, PlayerView, SectorId, StockId, VillageBridge, ZoomAction } from "@/types";
+import { BUILDING_POSITIONS, COLORS, DEPTH, HEX, MAX_ZOOM, MIN_ZOOM, TEXTURE, ZOOM_STEP } from "./constants";
 import { DistrictView } from "./DistrictView";
 import { flyCoins, hudPoint } from "./effects";
 import { prefersReducedMotion } from "./motion";
@@ -11,38 +11,34 @@ import { onTap } from "./input";
 import { LabelRegistry } from "./labels";
 import { WeatherLayer } from "./WeatherLayer";
 
-interface SvgEntry {
+interface ImageEntry {
   key: string;
   url: string;
-  width: number;
-  height: number;
 }
 
-const buildManifest = (): SvgEntry[] => {
-  const entries: SvgEntry[] = [
-    { key: TEXTURE.base, url: ASSETS.map.base, width: 1600, height: 1000 },
-    { key: TEXTURE.home, url: ASSETS.buildings.home, width: 128, height: 128 },
-    { key: TEXTURE.shop, url: ASSETS.buildings.shop, width: 128, height: 128 },
-    { key: TEXTURE.bank, url: ASSETS.buildings.bank, width: 128, height: 128 },
-    { key: TEXTURE.available, url: ASSETS.lotAvailable, width: 192, height: 192 },
-    { key: TEXTURE.decorTwo, url: ASSETS.decor.two, width: 192, height: 192 },
-    { key: TEXTURE.decorThree, url: ASSETS.decor.three, width: 192, height: 192 },
-    { key: TEXTURE.fog, url: ASSETS.fx.fog, width: 512, height: 256 },
-    { key: TEXTURE.padlock, url: ASSETS.fx.padlock, width: 128, height: 64 },
-    { key: TEXTURE.sparkle, url: ASSETS.fx.sparkle, width: 64, height: 64 },
-    { key: TEXTURE.coin, url: ASSETS.fx.coin, width: 32, height: 32 },
-    { key: TEXTURE.lockBadge, url: ASSETS.fx.lockBadge, width: 48, height: 48 },
-    { key: TEXTURE.cloud, url: ASSETS.fx.cloud, width: 320, height: 192 },
-    { key: TEXTURE.rain, url: ASSETS.fx.rain, width: 16, height: 64 },
-    { key: TEXTURE.rainbow, url: ASSETS.fx.rainbow, width: 512, height: 256 },
-    { key: TEXTURE.tapHand, url: ASSETS.tapHand, width: 48, height: 48 },
+const buildManifest = (): ImageEntry[] => {
+  const entries: ImageEntry[] = [
+    { key: TEXTURE.base, url: ASSETS.map.base },
+    { key: TEXTURE.home, url: ASSETS.buildings.home },
+    { key: TEXTURE.shop, url: ASSETS.buildings.shop },
+    { key: TEXTURE.bank, url: ASSETS.buildings.bank },
+    { key: TEXTURE.available, url: ASSETS.lotAvailable },
+    { key: TEXTURE.decorTwo, url: ASSETS.decor.two },
+    { key: TEXTURE.decorThree, url: ASSETS.decor.three },
+    { key: TEXTURE.fog, url: ASSETS.fx.fog },
+    { key: TEXTURE.padlock, url: ASSETS.fx.padlock },
+    { key: TEXTURE.sparkle, url: ASSETS.fx.sparkle },
+    { key: TEXTURE.coin, url: ASSETS.fx.coin },
+    { key: TEXTURE.lockBadge, url: ASSETS.fx.lockBadge },
+    { key: TEXTURE.cloud, url: ASSETS.fx.cloud },
+    { key: TEXTURE.rain, url: ASSETS.fx.rain },
+    { key: TEXTURE.rainbow, url: ASSETS.fx.rainbow },
+    { key: TEXTURE.tapHand, url: ASSETS.tapHand },
   ];
-  SECTORS.forEach((sector) =>
-    entries.push({ key: TEXTURE.ground(sector.id), url: ASSETS.district(sector.id), width: 512, height: 256 }),
-  );
+  SECTORS.forEach((sector) => entries.push({ key: TEXTURE.ground(sector.id), url: ASSETS.district(sector.id) }));
   STOCKS.forEach((stock) => {
-    entries.push({ key: TEXTURE.lot(stock.id), url: ASSETS.lot(stock.id), width: 192, height: 192 });
-    entries.push({ key: TEXTURE.harvest(stock.harvest), url: ASSETS.harvest(stock.harvest), width: 48, height: 48 });
+    entries.push({ key: TEXTURE.lot(stock.id), url: ASSETS.lot(stock.id) });
+    entries.push({ key: TEXTURE.harvest(stock.harvest), url: ASSETS.harvest(stock.harvest) });
   });
   return entries;
 };
@@ -56,6 +52,9 @@ export class VillageScene extends Phaser.Scene {
   private unsubscribe: (() => void) | null = null;
   private center = { x: WORLD.width / 2, y: WORLD.height / 2 };
   private canPan = false;
+  private fitZoom = 1;
+  private pinchDistance = 0;
+  private unsubscribeZoom: (() => void) | null = null;
 
   constructor(bridge: VillageBridge) {
     super("village");
@@ -65,10 +64,10 @@ export class VillageScene extends Phaser.Scene {
   preload(): void {
     this.load.on("loaderror", () => this.bridge.reportError());
     const loaded = new Set<string>();
-    buildManifest().forEach(({ key, url, width, height }) => {
+    buildManifest().forEach(({ key, url }) => {
       if (loaded.has(key)) return;
       loaded.add(key);
-      this.load.svg(key, url, { width, height });
+      this.load.image(key, url);
     });
   }
 
@@ -91,6 +90,7 @@ export class VillageScene extends Phaser.Scene {
     if (player) this.apply(player, false);
 
     this.unsubscribe = this.bridge.subscribe((next, previous) => this.handleUpdate(next, previous));
+    this.unsubscribeZoom = this.bridge.subscribeZoom((action) => this.handleZoom(action));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.events.once(Phaser.Scenes.Events.DESTROY, () => this.cleanup());
   }
@@ -189,25 +189,52 @@ export class VillageScene extends Phaser.Scene {
   }
 
   private setUpCamera(): void {
+    this.input.addPointer(1);
     this.fitCamera();
     this.scale.on(Phaser.Scale.Events.RESIZE, () => this.fitCamera());
-    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
-      if (!pointer.isDown || !this.canPan) return;
-      const camera = this.cameras.main;
-      this.center.x -= (pointer.x - pointer.prevPosition.x) / camera.zoom;
-      this.center.y -= (pointer.y - pointer.prevPosition.y) / camera.zoom;
-      this.clampCenter();
+    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => this.handlePointerMove(pointer));
+    this.input.on("pointerup", () => {
+      this.pinchDistance = 0;
+    });
+    this.input.on("wheel", (_pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
+      this.setZoom(this.cameras.main.zoom * (dy < 0 ? ZOOM_STEP : 1 / ZOOM_STEP));
     });
   }
 
-  private fitCamera(): void {
+  private handlePointerMove(pointer: Phaser.Input.Pointer): void {
+    const first = this.input.pointer1;
+    const second = this.input.pointer2;
+    if (first.isDown && second.isDown) {
+      const distance = Phaser.Math.Distance.Between(first.x, first.y, second.x, second.y);
+      if (this.pinchDistance > 0 && distance > 0)
+        this.setZoom(this.cameras.main.zoom * (distance / this.pinchDistance));
+      this.pinchDistance = distance;
+      return;
+    }
+    if (!pointer.isDown || !this.canPan) return;
     const camera = this.cameras.main;
-    const fit = Math.min(this.scale.width / WORLD.width, this.scale.height / WORLD.height);
-    camera.setZoom(Math.max(fit, MIN_ZOOM));
-    this.labels.update(camera.zoom);
-    this.canPan = camera.zoom > fit + 0.001;
-    this.center = { x: WORLD.width / 2, y: WORLD.height / 2 };
+    this.center.x -= (pointer.x - pointer.prevPosition.x) / camera.zoom;
+    this.center.y -= (pointer.y - pointer.prevPosition.y) / camera.zoom;
     this.clampCenter();
+  }
+
+  private handleZoom(action: ZoomAction): void {
+    if (action === "reset") this.fitCamera();
+    else this.setZoom(this.cameras.main.zoom * (action === "in" ? ZOOM_STEP : 1 / ZOOM_STEP));
+  }
+
+  private setZoom(zoom: number): void {
+    const camera = this.cameras.main;
+    camera.setZoom(Phaser.Math.Clamp(zoom, this.fitZoom, MAX_ZOOM));
+    this.labels.update(camera.zoom);
+    this.canPan = camera.zoom > this.fitZoom + 0.001;
+    this.clampCenter();
+  }
+
+  private fitCamera(): void {
+    this.fitZoom = Math.min(this.scale.width / WORLD.width, this.scale.height / WORLD.height);
+    this.center = { x: WORLD.width / 2, y: WORLD.height / 2 };
+    this.setZoom(Math.max(this.fitZoom, MIN_ZOOM));
   }
 
   private clampCenter(): void {
@@ -266,6 +293,8 @@ export class VillageScene extends Phaser.Scene {
   private cleanup(): void {
     this.unsubscribe?.();
     this.unsubscribe = null;
+    this.unsubscribeZoom?.();
+    this.unsubscribeZoom = null;
     this.weather?.destroy();
   }
 }

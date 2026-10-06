@@ -1,6 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Banner, BankTab, Dialogue, DialogueAction, LoanMode, NpcId, PanelId, SectorId, ShopFocus } from "@/types";
+import type {
+  Banner,
+  BankTab,
+  Dialogue,
+  DialogueAction,
+  LoanMode,
+  NpcId,
+  PanelId,
+  SectorId,
+  ShopFocus,
+  ZoomAction,
+  ZoomRequest,
+} from "@/types";
 
 export type TipId = "first-harvest" | "storm-warning";
 
@@ -13,6 +25,8 @@ interface UiState {
   dialogue: Dialogue | null;
   banner: Banner | null;
   seenTips: TipId[];
+  zoomRequest: ZoomRequest | null;
+  requestZoom: (action: ZoomAction) => void;
   openShop: (focus?: ShopFocus) => void;
   openBank: (tab?: BankTab, loanMode?: LoanMode) => void;
   openDistrict: (sector: SectorId) => void;
@@ -42,6 +56,8 @@ export const useUiStore = create<UiState>()(
       dialogue: null,
       banner: null,
       seenTips: [],
+      zoomRequest: null,
+      requestZoom: (action) => set({ zoomRequest: { id: nextId(), action } }),
       openShop: (focus = {}) => set({ panel: "shop", shopFocus: focus }),
       openBank: (tab = "collateral", loanMode = "borrow") => set({ panel: "bank", bankTab: tab, loanMode }),
       openDistrict: (sector) => set({ panel: "district", selectedSector: sector }),

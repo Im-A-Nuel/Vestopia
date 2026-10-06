@@ -1,6 +1,6 @@
 import type { HarvestKind, NpcId, SectorId, StockId, WeatherState } from "@/types";
 
-export const ASSET_EXTENSION = "svg";
+export const ASSET_EXTENSION = "png";
 
 const assetPath = (folder: string, name: string): string => `/assets/${folder}/${name}.${ASSET_EXTENSION}`;
 

@@ -97,7 +97,7 @@ export function Modal({ title, onClose, children, footer, tone }: ModalProps) {
           </button>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="border-t border-line bg-surface px-5 py-3">{footer}</div>}
+        {footer && <div className="pb-safe border-t border-line bg-surface px-5 pt-3">{footer}</div>}
       </div>
     </div>
   );

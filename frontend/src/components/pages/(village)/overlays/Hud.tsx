@@ -49,7 +49,7 @@ export function Hud() {
   if (!player) return null;
 
   return (
-    <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line bg-surface px-3 py-2 sm:px-4">
+    <header className="px-safe pt-safe flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line bg-surface pb-2 short:gap-y-0">
       <p className="pixel-text hidden text-xs text-main sm:block">{APP_NAME}</p>
 
       <dl className="grid min-w-0 flex-1 grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-1">

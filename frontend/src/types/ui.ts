@@ -32,6 +32,13 @@ export type CollateralMode = "deposit" | "withdraw";
 
 export type LoanMode = "borrow" | "repay";
 
+export type ZoomAction = "in" | "out" | "reset";
+
+export interface ZoomRequest {
+  id: number;
+  action: ZoomAction;
+}
+
 export type ConnectionStatus = "online" | "reconnecting";
 
 export interface Banner {
@@ -49,6 +56,7 @@ export interface VillageBridge {
   openBank: () => void;
   harvest: (stockId: StockId) => void;
   reportError: () => void;
+  subscribeZoom: (listener: (action: ZoomAction) => void) => () => void;
 }
 
 export interface ActivityEntry {

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { COPY } from "@/config";
 import { useMounted, useNarration, useVillageSync } from "@/hooks";
 import { useGameStore, useSessionStore, useUiStore } from "@/stores";
-import { EventBanner, Hud, LocationBar, NpcDialogue } from "./overlays";
+import { EventBanner, Hud, LocationBar, MapControls, NpcDialogue } from "./overlays";
 
 const VillageMap = dynamic(() => import("./map").then((module) => module.VillageMap), { ssr: false });
 const ShopPanel = dynamic(() => import("./panels").then((module) => module.ShopPanel), { ssr: false });
@@ -66,6 +66,7 @@ export function VillageScreen() {
       <Hud />
       <div className="relative min-h-0 flex-1">
         <VillageMap />
+        <MapControls />
         <EventBanner />
         <NpcDialogue />
       </div>
