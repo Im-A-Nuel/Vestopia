@@ -11,38 +11,34 @@ import { onTap } from "./input";
 import { LabelRegistry } from "./labels";
 import { WeatherLayer } from "./WeatherLayer";
 
-interface SvgEntry {
+interface ImageEntry {
   key: string;
   url: string;
-  width: number;
-  height: number;
 }
 
-const buildManifest = (): SvgEntry[] => {
-  const entries: SvgEntry[] = [
-    { key: TEXTURE.base, url: ASSETS.map.base, width: 1600, height: 1000 },
-    { key: TEXTURE.home, url: ASSETS.buildings.home, width: 128, height: 128 },
-    { key: TEXTURE.shop, url: ASSETS.buildings.shop, width: 128, height: 128 },
-    { key: TEXTURE.bank, url: ASSETS.buildings.bank, width: 128, height: 128 },
-    { key: TEXTURE.available, url: ASSETS.lotAvailable, width: 192, height: 192 },
-    { key: TEXTURE.decorTwo, url: ASSETS.decor.two, width: 192, height: 192 },
-    { key: TEXTURE.decorThree, url: ASSETS.decor.three, width: 192, height: 192 },
-    { key: TEXTURE.fog, url: ASSETS.fx.fog, width: 512, height: 256 },
-    { key: TEXTURE.padlock, url: ASSETS.fx.padlock, width: 128, height: 64 },
-    { key: TEXTURE.sparkle, url: ASSETS.fx.sparkle, width: 64, height: 64 },
-    { key: TEXTURE.coin, url: ASSETS.fx.coin, width: 32, height: 32 },
-    { key: TEXTURE.lockBadge, url: ASSETS.fx.lockBadge, width: 48, height: 48 },
-    { key: TEXTURE.cloud, url: ASSETS.fx.cloud, width: 320, height: 192 },
-    { key: TEXTURE.rain, url: ASSETS.fx.rain, width: 16, height: 64 },
-    { key: TEXTURE.rainbow, url: ASSETS.fx.rainbow, width: 512, height: 256 },
-    { key: TEXTURE.tapHand, url: ASSETS.tapHand, width: 48, height: 48 },
+const buildManifest = (): ImageEntry[] => {
+  const entries: ImageEntry[] = [
+    { key: TEXTURE.base, url: ASSETS.map.base },
+    { key: TEXTURE.home, url: ASSETS.buildings.home },
+    { key: TEXTURE.shop, url: ASSETS.buildings.shop },
+    { key: TEXTURE.bank, url: ASSETS.buildings.bank },
+    { key: TEXTURE.available, url: ASSETS.lotAvailable },
+    { key: TEXTURE.decorTwo, url: ASSETS.decor.two },
+    { key: TEXTURE.decorThree, url: ASSETS.decor.three },
+    { key: TEXTURE.fog, url: ASSETS.fx.fog },
+    { key: TEXTURE.padlock, url: ASSETS.fx.padlock },
+    { key: TEXTURE.sparkle, url: ASSETS.fx.sparkle },
+    { key: TEXTURE.coin, url: ASSETS.fx.coin },
+    { key: TEXTURE.lockBadge, url: ASSETS.fx.lockBadge },
+    { key: TEXTURE.cloud, url: ASSETS.fx.cloud },
+    { key: TEXTURE.rain, url: ASSETS.fx.rain },
+    { key: TEXTURE.rainbow, url: ASSETS.fx.rainbow },
+    { key: TEXTURE.tapHand, url: ASSETS.tapHand },
   ];
-  SECTORS.forEach((sector) =>
-    entries.push({ key: TEXTURE.ground(sector.id), url: ASSETS.district(sector.id), width: 512, height: 256 }),
-  );
+  SECTORS.forEach((sector) => entries.push({ key: TEXTURE.ground(sector.id), url: ASSETS.district(sector.id) }));
   STOCKS.forEach((stock) => {
-    entries.push({ key: TEXTURE.lot(stock.id), url: ASSETS.lot(stock.id), width: 192, height: 192 });
-    entries.push({ key: TEXTURE.harvest(stock.harvest), url: ASSETS.harvest(stock.harvest), width: 48, height: 48 });
+    entries.push({ key: TEXTURE.lot(stock.id), url: ASSETS.lot(stock.id) });
+    entries.push({ key: TEXTURE.harvest(stock.harvest), url: ASSETS.harvest(stock.harvest) });
   });
   return entries;
 };
@@ -65,10 +61,10 @@ export class VillageScene extends Phaser.Scene {
   preload(): void {
     this.load.on("loaderror", () => this.bridge.reportError());
     const loaded = new Set<string>();
-    buildManifest().forEach(({ key, url, width, height }) => {
+    buildManifest().forEach(({ key, url }) => {
       if (loaded.has(key)) return;
       loaded.add(key);
-      this.load.svg(key, url, { width, height });
+      this.load.image(key, url);
     });
   }
 
