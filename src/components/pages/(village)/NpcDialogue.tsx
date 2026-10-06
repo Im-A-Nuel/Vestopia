@@ -1,0 +1,39 @@
+"use client";
+
+import { useEffect } from "react";
+import { useUiStore } from "@/stores";
+import { NpcSpeech } from "@/components/pages/(shared)";
+
+export function NpcDialogue() {
+  const dialogue = useUiStore((state) => state.dialogue);
+  const panel = useUiStore((state) => state.panel);
+  const dismiss = useUiStore((state) => state.dismissDialogue);
+
+  useEffect(() => {
+    if (!dialogue) return;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") dismiss();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [dialogue, dismiss]);
+
+  if (!dialogue || panel) return null;
+
+  return (
+    <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center px-4 pb-4">
+      <section
+        key={dialogue.id}
+        aria-live="polite"
+        className="panel animate-sheet-rise flex w-full max-w-xl flex-col gap-3 p-3 sm:flex-row sm:items-center"
+      >
+        <div className="flex-1">
+          <NpcSpeech npc={dialogue.npc} text={dialogue.text} />
+        </div>
+        <button type="button" className="btn btn-primary" onClick={dismiss}>
+          Got it
+        </button>
+      </section>
+    </div>
+  );
+}
