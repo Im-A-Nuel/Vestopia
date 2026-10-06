@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { DIALOGUE_TIMEOUT_MS } from "@/config";
 import { useUiStore } from "@/stores";
 import type { DialogueActionKind } from "@/types";
 import { NpcSpeech } from "@/components/pages/(shared)";
@@ -10,6 +11,7 @@ export function NpcDialogue() {
   const panel = useUiStore((state) => state.panel);
   const dismiss = useUiStore((state) => state.dismissDialogue);
   const openBank = useUiStore((state) => state.openBank);
+  const [pausedId, setPausedId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!dialogue) return;
@@ -19,6 +21,16 @@ export function NpcDialogue() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [dialogue, dismiss]);
+
+  const dialogueId = dialogue?.id;
+  const persistent = dialogue?.persistent ?? true;
+  const paused = dialogueId !== undefined && pausedId === dialogueId;
+
+  useEffect(() => {
+    if (dialogueId === undefined || persistent || paused || panel) return;
+    const timer = window.setTimeout(dismiss, DIALOGUE_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [dialogueId, persistent, paused, panel, dismiss]);
 
   if (!dialogue || panel) return null;
 
@@ -33,9 +45,13 @@ export function NpcDialogue() {
       <section
         key={dialogue.id}
         aria-live="polite"
+        onMouseEnter={() => setPausedId(dialogue.id)}
+        onMouseLeave={() => setPausedId(null)}
+        onFocus={() => setPausedId(dialogue.id)}
+        onBlur={() => setPausedId(null)}
         className="panel animate-sheet-rise flex w-full max-w-xl flex-col gap-2 p-2 sm:gap-3 sm:p-3"
       >
-        <NpcSpeech npc={dialogue.npc} text={dialogue.text} />
+        <NpcSpeech npc={dialogue.npc} text={dialogue.text} compact />
         <div className="flex flex-wrap justify-end gap-2">
           {dialogue.actions.map((action) => (
             <button

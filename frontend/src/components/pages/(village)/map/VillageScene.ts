@@ -1,10 +1,11 @@
 import Phaser from "phaser";
 import { ASSETS, SECTORS, STOCKS, WORLD } from "@/config";
 import { diffPlayers } from "@/lib";
-import type { PlayerView, SectorId, StockId, VillageBridge } from "@/types";
+import type { GameChange, PlayerView, SectorId, StockId, VillageBridge } from "@/types";
 import { BUILDING_POSITIONS, COLORS, DEPTH, HEX, MIN_ZOOM, TEXTURE } from "./constants";
 import { DistrictView } from "./DistrictView";
 import { flyCoins, hudPoint } from "./effects";
+import { prefersReducedMotion } from "./motion";
 import type { LotView } from "./LotView";
 import { onTap } from "./input";
 import { LabelRegistry } from "./labels";
@@ -33,6 +34,7 @@ const buildManifest = (): SvgEntry[] => {
     { key: TEXTURE.lockBadge, url: ASSETS.fx.lockBadge, width: 48, height: 48 },
     { key: TEXTURE.cloud, url: ASSETS.fx.cloud, width: 320, height: 192 },
     { key: TEXTURE.rain, url: ASSETS.fx.rain, width: 16, height: 64 },
+    { key: TEXTURE.rainbow, url: ASSETS.fx.rainbow, width: 512, height: 256 },
     { key: TEXTURE.tapHand, url: ASSETS.tapHand, width: 48, height: 48 },
   ];
   SECTORS.forEach((sector) =>
@@ -74,6 +76,7 @@ export class VillageScene extends Phaser.Scene {
     this.add.rectangle(WORLD.width / 2, WORLD.height / 2, 8000, 6000, HEX.grass).setDepth(DEPTH.base - 1);
     this.add.image(WORLD.width / 2, WORLD.height / 2, TEXTURE.base).setDepth(DEPTH.base);
     this.createBuildings();
+    this.createChimneySmoke();
     this.setUpCamera();
 
     SECTORS.forEach((sector) => {
@@ -124,6 +127,67 @@ export class VillageScene extends Phaser.Scene {
     );
   }
 
+  private createChimneySmoke(): void {
+    if (prefersReducedMotion()) return;
+    const home = BUILDING_POSITIONS.home;
+    this.add
+      .particles(home.x + 24, home.y - 60, TEXTURE.cloud, {
+        lifespan: 2800,
+        speedY: { min: -26, max: -16 },
+        speedX: { min: 4, max: 12 },
+        scale: { start: 0.05, end: 0.14 },
+        alpha: { start: 0.55, end: 0 },
+        frequency: 900,
+        quantity: 1,
+      })
+      .setDepth(DEPTH.lot + 1);
+  }
+
+  private focusOn(x: number, y: number, returnAfter?: number): void {
+    if (!this.canPan || prefersReducedMotion()) return;
+    this.tweens.killTweensOf(this.center);
+    this.tweens.add({
+      targets: this.center,
+      x,
+      y,
+      duration: 800,
+      ease: "Sine.easeInOut",
+      onUpdate: () => this.clampCenter(),
+    });
+    if (returnAfter === undefined) return;
+    this.time.delayedCall(returnAfter, () => {
+      this.tweens.killTweensOf(this.center);
+      this.tweens.add({
+        targets: this.center,
+        x: WORLD.width / 2,
+        y: WORLD.height / 2,
+        duration: 900,
+        ease: "Sine.easeInOut",
+        onUpdate: () => this.clampCenter(),
+      });
+    });
+  }
+
+  private focusOnChange(changes: GameChange[]): void {
+    const unlocked = changes.find((change) => change.type === "unlock");
+    if (unlocked && unlocked.type === "unlock") {
+      const center = this.districts.get(unlocked.sector)?.sector.center;
+      if (center) this.focusOn(center.x, center.y);
+      return;
+    }
+    const filled = changes.find((change) => change.type === "lot-filled");
+    if (filled && filled.type === "lot-filled") {
+      const lot = this.lots.get(filled.stockId);
+      if (lot) this.focusOn(lot.x, lot.y);
+      return;
+    }
+    const moves = changes.flatMap((change) => (change.type === "price" ? [change] : []));
+    if (moves.length === 0) return;
+    const biggest = moves.reduce((best, change) => (Math.abs(change.percent) > Math.abs(best.percent) ? change : best));
+    const lot = this.lots.get(biggest.stockId);
+    if (lot) this.focusOn(lot.x, lot.y, 4200);
+  }
+
   private setUpCamera(): void {
     this.fitCamera();
     this.scale.on(Phaser.Scale.Events.RESIZE, () => this.fitCamera());
@@ -165,7 +229,9 @@ export class VillageScene extends Phaser.Scene {
     this.apply(next, previous !== null);
     if (!previous) return;
 
-    diffPlayers(previous, next).forEach((change) => {
+    const changes = diffPlayers(previous, next);
+    this.focusOnChange(changes);
+    changes.forEach((change) => {
       if (change.type === "price") this.lots.get(change.stockId)?.reactToPrice(change.percent);
       if (change.type === "value") {
         const lot = this.lots.get(change.stockId);
@@ -173,7 +239,7 @@ export class VillageScene extends Phaser.Scene {
           lot?.celebrateBuy(change.delta);
           if (lot) flyCoins(this, hudPoint(this), lot);
         } else {
-          lot?.celebrateSell();
+          lot?.celebrateSell(change.profit);
           if (lot) flyCoins(this, lot, hudPoint(this));
         }
       }

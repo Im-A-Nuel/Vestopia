@@ -3,6 +3,7 @@ import type { MarketEventId, MarketEventPreset } from "@/types";
 export const MARKET_EVENTS: readonly MarketEventPreset[] = [
   {
     id: "tech_boom",
+    sector: "tech",
     title: "Tech boom",
     banner: "Nvidia unveils a new chip! The Tech Office is buzzing.",
     priceMultipliers: { nvda: 1.25, aapl: 1.1 },
@@ -11,6 +12,7 @@ export const MARKET_EVENTS: readonly MarketEventPreset[] = [
   },
   {
     id: "gold_crash",
+    sector: "commodity",
     title: "Gold crash",
     banner: "Gold prices crash! The Mine goes quiet.",
     priceMultipliers: { nem: 0.6, xom: 0.9 },
@@ -19,6 +21,7 @@ export const MARKET_EVENTS: readonly MarketEventPreset[] = [
   },
   {
     id: "drought",
+    sector: "agri",
     title: "Drought",
     banner: "A drought hits the Farm.",
     priceMultipliers: { de: 0.85, adm: 0.8 },
@@ -27,6 +30,7 @@ export const MARKET_EVENTS: readonly MarketEventPreset[] = [
   },
   {
     id: "holiday_sale",
+    sector: "consumer",
     title: "Holiday sale",
     banner: "Holiday shopping season! The Factory is busy.",
     priceMultipliers: { ko: 1.12, pg: 1.08 },

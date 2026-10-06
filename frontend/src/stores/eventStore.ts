@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getMarketEvent } from "@/config";
 import { gameService } from "@/services";
 import type { LatestEvent, MarketEventId } from "@/types";
 import { useUiStore } from "./uiStore";
@@ -19,7 +20,7 @@ export const useEventStore = create<EventState>()((set, get) => ({
       const seen = get().lastSeenSequence;
       set({ latest, lastSeenSequence: latest?.sequence ?? 0 });
       if (latest && seen !== null && latest.sequence > seen) {
-        useUiStore.getState().showBanner(latest.banner);
+        useUiStore.getState().showBanner(latest.banner, getMarketEvent(latest.id).sector);
       }
     } catch {
       return;

@@ -53,6 +53,7 @@ export const TEXTURE = {
   lockBadge: "fx-lock-badge",
   cloud: "fx-cloud",
   rain: "fx-rain",
+  rainbow: "fx-rainbow",
   tapHand: "harvest-tap-hand",
   lot: (id: StockId): string => `lot-${id}`,
   ground: (id: SectorId): string => `ground-${id}`,

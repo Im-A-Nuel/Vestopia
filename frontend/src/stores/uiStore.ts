@@ -18,9 +18,9 @@ interface UiState {
   openDistrict: (sector: SectorId) => void;
   openInfo: () => void;
   closePanel: () => void;
-  say: (npc: NpcId, text: string, actions?: DialogueAction[]) => void;
+  say: (npc: NpcId, text: string, actions?: DialogueAction[], persistent?: boolean) => void;
   dismissDialogue: () => void;
-  showBanner: (text: string) => void;
+  showBanner: (text: string, sector?: SectorId) => void;
   clearBanner: (id: number) => void;
   markTipSeen: (tip: TipId) => boolean;
 }
@@ -47,9 +47,10 @@ export const useUiStore = create<UiState>()(
       openDistrict: (sector) => set({ panel: "district", selectedSector: sector }),
       openInfo: () => set({ panel: "info" }),
       closePanel: () => set({ panel: null }),
-      say: (npc, text, actions = []) => set({ dialogue: { id: nextId(), npc, text, actions } }),
+      say: (npc, text, actions = [], persistent = actions.length > 0) =>
+        set({ dialogue: { id: nextId(), npc, text, actions, persistent } }),
       dismissDialogue: () => set({ dialogue: null }),
-      showBanner: (text) => set({ banner: { id: nextId(), text } }),
+      showBanner: (text, sector) => set({ banner: { id: nextId(), text, sector } }),
       clearBanner: (id) => {
         if (get().banner?.id === id) set({ banner: null });
       },

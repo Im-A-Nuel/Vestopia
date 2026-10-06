@@ -1,4 +1,4 @@
-import type { PlayerView, StockId } from "./game";
+import type { MarketSnapshot, PlayerView, SectorId, StockId } from "./game";
 
 export type Amount = number | "max";
 
@@ -29,6 +29,7 @@ export interface MarketEventPreset {
   id: MarketEventId;
   title: string;
   banner: string;
+  sector?: SectorId;
   priceMultipliers: Partial<Record<StockId, number>>;
   resetsPrices: boolean;
   paysDividends: boolean;
@@ -54,5 +55,7 @@ export interface GameService {
   harvestAll(address: string): Promise<ActionResult>;
   triggerEvent(eventId: MarketEventId): Promise<ActionResult>;
   getLatestEvent(): Promise<LatestEvent | null>;
+  getEventLog(): Promise<LatestEvent[]>;
+  getMarket(): Promise<MarketSnapshot>;
   resetDemo(): Promise<ActionResult>;
 }

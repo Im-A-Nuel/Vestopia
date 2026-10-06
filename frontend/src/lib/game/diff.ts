@@ -33,7 +33,9 @@ export const diffPlayers = (previous: PlayerView, next: PlayerView): GameChange[
     if (priceMoved && before.price > 0) {
       changes.push({ type: "price", stockId: stock.id, percent: (stock.price / before.price - 1) * 100 });
     } else if (changed(before.value, stock.value)) {
-      changes.push({ type: "value", stockId: stock.id, delta: stock.value - before.value });
+      const delta = stock.value - before.value;
+      const profit = delta < 0 ? -delta + (stock.costBasis - before.costBasis) : 0;
+      changes.push({ type: "value", stockId: stock.id, delta, profit });
     }
 
     if (before.level !== stock.level) {

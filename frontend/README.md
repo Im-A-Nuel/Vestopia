@@ -19,7 +19,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Set `ADMIN_PASSWORD` in `.env.local`. The admin panel lives at `/admin`.
+Set `ADMIN_PASSWORD` in `.env.local`. The admin panel lives at `/admin`. A correct password sets an HttpOnly, SameSite=Strict session cookie that lasts one hour, so a reload does not lock you out.
 
 ## Scripts
 

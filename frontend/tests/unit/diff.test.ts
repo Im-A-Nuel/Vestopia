@@ -62,4 +62,27 @@ describe("diffPlayers", () => {
     expect(diffPlayers(empty, ready)).toContainEqual({ type: "harvest-ready", stockId: "nvda", amount: 1.5 });
     expect(diffPlayers(ready, empty)).toContainEqual({ type: "harvest-collected", stockId: "nvda", amount: 1.5 });
   });
+
+  it("reports realized profit when shares are sold above their cost", () => {
+    const before = view((ledger) => {
+      ledger.shares.nem = 10;
+      ledger.costBasis.nem = 400;
+    });
+    const after = view((ledger) => {
+      ledger.shares.nem = 5;
+      ledger.costBasis.nem = 200;
+    });
+    const sale = diffPlayers(before, after).find((change) => change.type === "value");
+    expect(sale && sale.type === "value" ? sale.profit : null).toBeCloseTo(75, 6);
+  });
+
+  it("reports no profit for purchases", () => {
+    const before = view(() => undefined);
+    const after = view((ledger) => {
+      ledger.shares.nem = 5;
+      ledger.costBasis.nem = 275;
+    });
+    const buy = diffPlayers(before, after).find((change) => change.type === "value");
+    expect(buy && buy.type === "value" ? buy.profit : null).toBe(0);
+  });
 });

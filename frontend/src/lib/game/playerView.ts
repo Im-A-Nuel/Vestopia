@@ -19,6 +19,7 @@ export const buildPlayerView = (ledger: PlayerLedger, market: MarketSnapshot): P
       collateralShares,
       value,
       collateralValue: collateralShares * price,
+      costBasis: ledger.costBasis[stock.id],
       level: getLotLevel(value),
       pendingHarvest: ledger.pending[stock.id],
     };

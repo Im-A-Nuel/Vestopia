@@ -30,6 +30,7 @@ export const ASSETS = {
     lockBadge: assetPath("fx", "lock-badge"),
     cloud: assetPath("fx", "cloud"),
     rain: assetPath("fx", "rain"),
+    rainbow: assetPath("fx", "rainbow"),
   },
   title: assetPath("title", "title-bg"),
 } as const;

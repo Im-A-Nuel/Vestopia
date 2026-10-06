@@ -38,6 +38,7 @@ export interface StockView {
   collateralShares: number;
   value: number;
   collateralValue: number;
+  costBasis: number;
   level: LotLevel;
   pendingHarvest: number;
 }
@@ -71,6 +72,7 @@ export interface PlayerLedger {
   shares: StockLedger;
   collateral: StockLedger;
   pending: StockLedger;
+  costBasis: StockLedger;
   debt: number;
 }
 
@@ -81,7 +83,7 @@ export interface MarketSnapshot {
 
 export type GameChange =
   | { type: "price"; stockId: StockId; percent: number }
-  | { type: "value"; stockId: StockId; delta: number }
+  | { type: "value"; stockId: StockId; delta: number; profit: number }
   | { type: "level"; stockId: StockId; from: LotLevel; to: LotLevel }
   | { type: "lot-filled"; stockId: StockId }
   | { type: "lot-emptied"; stockId: StockId }

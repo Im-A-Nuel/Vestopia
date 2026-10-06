@@ -52,7 +52,7 @@ export function VillageScreen() {
   useEffect(() => {
     if (!needsStarter) return;
     void claimStarter().then((result) => {
-      if (result.status === "success") say("guide", COPY.welcome);
+      if (result.status === "success") say("guide", COPY.welcome, [], true);
     });
   }, [needsStarter, claimStarter, say]);
 

@@ -21,6 +21,7 @@ export interface Dialogue {
   npc: NpcId;
   text: string;
   actions: DialogueAction[];
+  persistent: boolean;
 }
 
 export type TradeMode = "buy" | "sell";
@@ -36,6 +37,7 @@ export type ConnectionStatus = "online" | "reconnecting";
 export interface Banner {
   id: number;
   text: string;
+  sector?: SectorId;
 }
 
 export interface VillageBridge {

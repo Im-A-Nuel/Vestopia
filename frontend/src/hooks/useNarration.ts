@@ -15,7 +15,7 @@ export const useNarration = (): void => {
         diffPlayers(previous.player, state.player).forEach((change) => {
           if (change.type === "unlock") {
             const sector = getSector(change.sector);
-            ui.showBanner(COPY.unlockedBanner(sector.district));
+            ui.showBanner(COPY.unlockedBanner(sector.district), sector.id);
             ui.say("guide", sector.lore);
           }
           if (change.type === "relock") {
