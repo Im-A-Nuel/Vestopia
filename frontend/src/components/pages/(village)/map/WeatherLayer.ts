@@ -1,7 +1,9 @@
 import Phaser from "phaser";
 import { WORLD } from "@/config";
 import type { WeatherState } from "@/types";
-import { DEPTH, TEXTURE } from "./constants";
+import { DEPTH, HEX, TEXTURE } from "./constants";
+import { shakeCamera } from "./effects";
+import { prefersReducedMotion } from "./motion";
 
 const COVER = { width: 8000, height: 6000 } as const;
 
@@ -31,10 +33,10 @@ export class WeatherLayer {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.shade = scene.add
-      .rectangle(WORLD.width / 2, WORLD.height / 2, COVER.width, COVER.height, 0x1d2540, 0)
+      .rectangle(WORLD.width / 2, WORLD.height / 2, COVER.width, COVER.height, HEX.storm, 0)
       .setDepth(DEPTH.weather);
     this.flash = scene.add
-      .rectangle(WORLD.width / 2, WORLD.height / 2, COVER.width, COVER.height, 0xffffff, 0)
+      .rectangle(WORLD.width / 2, WORLD.height / 2, COVER.width, COVER.height, HEX.white, 0)
       .setDepth(DEPTH.flash);
 
     this.clouds = Array.from({ length: CLOUD_COUNT }, (_, index) =>
@@ -44,7 +46,9 @@ export class WeatherLayer {
         .setAlpha(0)
         .setScale(1.6 + (index % 3) * 0.4),
     );
-    this.clouds.forEach((cloud, index) => this.driftCloud(cloud, 38000 + index * 4000));
+    if (!prefersReducedMotion()) {
+      this.clouds.forEach((cloud, index) => this.driftCloud(cloud, 38000 + index * 4000));
+    }
 
     this.rain = scene.add
       .particles(0, -400, TEXTURE.rain, {
@@ -52,7 +56,7 @@ export class WeatherLayer {
         lifespan: 1700,
         speedY: { min: 900, max: 1100 },
         speedX: { min: -260, max: -200 },
-        quantity: 9,
+        quantity: prefersReducedMotion() ? 3 : 9,
         frequency: 24,
         alpha: { start: 0.75, end: 0.35 },
         rotate: 14,
@@ -113,7 +117,8 @@ export class WeatherLayer {
   }
 
   private strike(): void {
+    if (prefersReducedMotion()) return;
     this.scene.tweens.add({ targets: this.flash, fillAlpha: { from: 0.85, to: 0 }, duration: 220, repeat: 1 });
-    this.scene.cameras.main.shake(180, 0.002);
+    shakeCamera(this.scene, 180, 0.002);
   }
 }

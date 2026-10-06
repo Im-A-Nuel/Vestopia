@@ -18,8 +18,18 @@ export const COPY = {
   harvestDay: "Harvest Day! Your companies paid dividends.",
   unlockedBanner: (district: string) => `New district unlocked: ${district}!`,
   relocked: (district: string) => `The ${district} is resting for now. Own shares again to reopen it.`,
+  demoNotice: "Demo mode: your passkey is simulated and your village is saved in this browser only.",
+  explain: {
+    borrowLimit: "You can borrow up to 50% of the value of the shares you put in collateral.",
+    health:
+      "Health compares your collateral to your loan. Above 1.5 the village stays Sunny, between 1.1 and 1.5 it turns Cloudy, and below 1.1 it turns Stormy. Below 1.0 other traders may repay part of your loan and take collateral.",
+    dividend:
+      "On Harvest Day each company pays a share of the value you own. Simulated rates are faster than real ones.",
+  },
   errors: {
+    sharesInCollateral: "Those shares are in collateral. Withdraw them at the Village Bank first.",
     passkeyUnsupported: "This browser doesn't support passkeys yet. Try the latest Chrome or Safari.",
+    mapFailed: "The village map could not load. You can still use the location buttons below once it is back.",
     generic: "Hmm, that didn't go through. Let's try again.",
     borrowLimit: "Your collateral isn't enough for a loan that big.",
     unsafeWithdraw: "Taking that out would leave your loan too risky.",

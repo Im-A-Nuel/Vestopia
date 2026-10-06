@@ -6,16 +6,13 @@ import { useEffect } from "react";
 import { COPY } from "@/config";
 import { useMounted, useNarration, useVillageSync } from "@/hooks";
 import { useGameStore, useSessionStore, useUiStore } from "@/stores";
-import { EventBanner } from "./EventBanner";
-import { Hud } from "./Hud";
-import { LocationBar } from "./LocationBar";
-import { NpcDialogue } from "./NpcDialogue";
+import { EventBanner, Hud, LocationBar, NpcDialogue } from "./overlays";
 
-const VillageMap = dynamic(() => import("./map/VillageMap"), { ssr: false });
-const ShopPanel = dynamic(() => import("./panels/ShopPanel"), { ssr: false });
-const BankPanel = dynamic(() => import("./panels/BankPanel"), { ssr: false });
-const DistrictPanel = dynamic(() => import("./panels/DistrictPanel"), { ssr: false });
-const InfoPanel = dynamic(() => import("./panels/InfoPanel"), { ssr: false });
+const VillageMap = dynamic(() => import("./map").then((module) => module.VillageMap), { ssr: false });
+const ShopPanel = dynamic(() => import("./panels").then((module) => module.ShopPanel), { ssr: false });
+const BankPanel = dynamic(() => import("./panels").then((module) => module.BankPanel), { ssr: false });
+const DistrictPanel = dynamic(() => import("./panels").then((module) => module.DistrictPanel), { ssr: false });
+const InfoPanel = dynamic(() => import("./panels").then((module) => module.InfoPanel), { ssr: false });
 
 function StatusScreen({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
@@ -60,7 +57,8 @@ export function VillageScreen() {
   }, [needsStarter, claimStarter, say]);
 
   if (!mounted || !address) return <StatusScreen message="Opening your village..." />;
-  if (!player && status === "error") return <StatusScreen message={COPY.errors.generic} onRetry={() => void refresh()} />;
+  if (!player && status === "error")
+    return <StatusScreen message={COPY.errors.generic} onRetry={() => void refresh()} />;
   if (!player) return <StatusScreen message="Loading your village..." />;
 
   return (

@@ -1,17 +1,27 @@
 "use client";
 
 import { useEffect, useId, useRef, type MouseEvent, type ReactNode } from "react";
+import type { WeatherState } from "@/types";
 
 interface ModalProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  tone?: WeatherState;
 }
 
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const BACKDROP_TONES: Record<WeatherState | "default", string> = {
+  default: "bg-ink/45",
+  sunny: "bg-ink/40",
+  cloudy: "bg-storm/60",
+  stormy: "bg-storm/80",
+};
 
-export function Modal({ title, onClose, children, footer }: ModalProps) {
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+export function Modal({ title, onClose, children, footer, tone }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -66,7 +76,10 @@ export function Modal({ title, onClose, children, footer }: ModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/45 sm:items-center sm:p-4" onMouseDown={handleBackdrop}>
+    <div
+      className={`fixed inset-0 z-40 flex items-end justify-center transition-colors duration-500 sm:items-center sm:p-4 ${BACKDROP_TONES[tone ?? "default"]}`}
+      onMouseDown={handleBackdrop}
+    >
       <div
         ref={panelRef}
         role="dialog"

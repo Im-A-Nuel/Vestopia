@@ -26,6 +26,9 @@ Set `ADMIN_PASSWORD` in `.env.local`. The admin panel lives at `/admin`.
 - `pnpm dev` starts the development server
 - `pnpm run build` creates the production build
 - `pnpm lint` runs ESLint
+- `pnpm format` formats `src` and `tests` with Prettier
+- `pnpm test` runs the Vitest unit tests for game rules and the mock service
+- `pnpm test:e2e` runs the Playwright suite (demo script, keyboard, mobile, axe accessibility). It needs Google Chrome and reuses a running `pnpm dev` server
 
 ## Project structure
 

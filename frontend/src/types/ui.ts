@@ -9,11 +9,29 @@ export interface ShopFocus {
   sector?: SectorId;
 }
 
+export type DialogueActionKind = "repay" | "collateral";
+
+export interface DialogueAction {
+  kind: DialogueActionKind;
+  label: string;
+}
+
 export interface Dialogue {
   id: number;
   npc: NpcId;
   text: string;
+  actions: DialogueAction[];
 }
+
+export type TradeMode = "buy" | "sell";
+
+export type SectorFilter = SectorId | "all";
+
+export type CollateralMode = "deposit" | "withdraw";
+
+export type LoanMode = "borrow" | "repay";
+
+export type ConnectionStatus = "online" | "reconnecting";
 
 export interface Banner {
   id: number;
@@ -28,6 +46,7 @@ export interface VillageBridge {
   openShop: (focus: ShopFocus) => void;
   openBank: () => void;
   harvest: (stockId: StockId) => void;
+  reportError: () => void;
 }
 
 export interface ActivityEntry {

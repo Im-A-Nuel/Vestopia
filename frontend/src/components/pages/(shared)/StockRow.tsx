@@ -1,7 +1,7 @@
 import { ASSETS } from "@/config";
 import { formatPercent, formatPrice, formatShares } from "@/lib";
 import type { StockConfig, StockView } from "@/types";
-import { GameImage } from "@/components/pages/(shared)";
+import { GameImage } from "./GameImage";
 
 interface StockRowProps {
   config: StockConfig;

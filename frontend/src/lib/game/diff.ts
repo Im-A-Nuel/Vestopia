@@ -11,6 +11,10 @@ export const diffPlayers = (previous: PlayerView, next: PlayerView): GameChange[
     changes.push({ type: "koin", delta: next.koin - previous.koin });
   }
 
+  if (changed(previous.debt, next.debt)) {
+    changes.push({ type: "debt", delta: next.debt - previous.debt });
+  }
+
   if (previous.weather !== next.weather) {
     changes.push({ type: "weather", from: previous.weather, to: next.weather });
   }
@@ -47,7 +51,11 @@ export const diffPlayers = (previous: PlayerView, next: PlayerView): GameChange[
     if (stock.pendingHarvest > before.pendingHarvest + EPSILON) {
       changes.push({ type: "harvest-ready", stockId: stock.id, amount: stock.pendingHarvest - before.pendingHarvest });
     } else if (stock.pendingHarvest < before.pendingHarvest - EPSILON) {
-      changes.push({ type: "harvest-collected", stockId: stock.id, amount: before.pendingHarvest - stock.pendingHarvest });
+      changes.push({
+        type: "harvest-collected",
+        stockId: stock.id,
+        amount: before.pendingHarvest - stock.pendingHarvest,
+      });
     }
   });
 

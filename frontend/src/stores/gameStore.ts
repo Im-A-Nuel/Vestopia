@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import { create } from "zustand";
 import { COPY } from "@/config";
 import { gameService } from "@/services";
-import type { ActionResult, ActivityEntry, Amount, PlayerView, StockId } from "@/types";
+import type { ActionResult, ActivityEntry, Amount, ConnectionStatus, PlayerView, StockId } from "@/types";
 import { useSessionStore } from "./sessionStore";
 
 export type LoadStatus = "idle" | "loading" | "ready" | "error";
@@ -14,6 +14,7 @@ interface GameState {
   status: LoadStatus;
   busy: boolean;
   activity: ActivityEntry[];
+  connection: ConnectionStatus;
   refresh: () => Promise<void>;
   reset: () => void;
   claimStarter: () => Promise<ActionResult>;
@@ -25,6 +26,7 @@ interface GameState {
   repay: (koinAmount: Amount) => Promise<ActionResult>;
   harvest: (stockId: StockId) => Promise<ActionResult>;
   harvestAll: () => Promise<ActionResult>;
+  resetDemo: () => Promise<ActionResult>;
 }
 
 const MAX_ACTIVITY = 8;
@@ -39,9 +41,9 @@ export const useGameStore = create<GameState>()((set, get) => {
     if (!address) return;
     try {
       const player = await gameService.getPlayer(address);
-      set({ player, status: "ready" });
+      set({ player, status: "ready", connection: "online" });
     } catch {
-      set({ status: get().player ? "ready" : "error" });
+      set({ status: get().player ? "ready" : "error", connection: "reconnecting" });
     }
   };
 
@@ -78,14 +80,17 @@ export const useGameStore = create<GameState>()((set, get) => {
     status: "idle",
     busy: false,
     activity: [],
+    connection: "online",
     refresh: async () => {
       if (get().status === "idle") set({ status: "loading" });
       await refresh();
     },
-    reset: () => set({ player: null, status: "idle", busy: false, activity: [] }),
+    reset: () => set({ player: null, status: "idle", busy: false, activity: [], connection: "online" }),
     claimStarter: () => run((address) => gameService.claimStarter(address), { notifySuccess: false }),
-    buy: (stockId, koinAmount) => run((address) => gameService.buy(address, stockId, koinAmount), { notifySuccess: true }),
-    sell: (stockId, koinAmount) => run((address) => gameService.sell(address, stockId, koinAmount), { notifySuccess: true }),
+    buy: (stockId, koinAmount) =>
+      run((address) => gameService.buy(address, stockId, koinAmount), { notifySuccess: true }),
+    sell: (stockId, koinAmount) =>
+      run((address) => gameService.sell(address, stockId, koinAmount), { notifySuccess: true }),
     deposit: (stockId, koinAmount) =>
       run((address) => gameService.deposit(address, stockId, koinAmount), { notifySuccess: true }),
     withdraw: (stockId, koinAmount) =>
@@ -94,5 +99,10 @@ export const useGameStore = create<GameState>()((set, get) => {
     repay: (koinAmount) => run((address) => gameService.repay(address, koinAmount), { notifySuccess: true }),
     harvest: (stockId) => run((address) => gameService.harvest(address, stockId), { notifySuccess: true }),
     harvestAll: () => run((address) => gameService.harvestAll(address), { notifySuccess: true }),
+    resetDemo: async () => {
+      const result = await gameService.resetDemo();
+      if (result.status === "error") toast.error(result.message);
+      return result;
+    },
   };
 });

@@ -22,7 +22,10 @@ export const useNarration = (): void => {
             ui.say("guide", COPY.relocked(getSector(change.sector).district));
           }
           if (change.type === "weather" && change.to === "stormy") {
-            ui.say("banker", COPY.stormWarning);
+            ui.say("banker", COPY.stormWarning, [
+              { kind: "repay", label: "Repay" },
+              { kind: "collateral", label: "Add collateral" },
+            ]);
           }
           if (change.type === "harvest-collected" && ui.markTipSeen("first-harvest")) {
             ui.say("guide", COPY.firstHarvest);

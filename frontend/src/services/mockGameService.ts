@@ -21,6 +21,7 @@ import type {
   StockId,
 } from "@/types";
 import {
+  clearMockData,
   loadLatestEvent,
   loadMarket,
   loadPlayer,
@@ -164,7 +165,9 @@ export const mockGameService: GameService = {
       const shares = koinAmount / market.prices[stockId];
       ledger.koin = Math.max(0, ledger.koin - koinAmount);
       ledger.shares[stockId] += shares;
-      return success(`Bought ${formatShares(shares)} ${getStock(stockId).name} shares for ${formatCoins(koinAmount)} Coins.`);
+      return success(
+        `Bought ${formatShares(shares)} ${getStock(stockId).name} shares for ${formatCoins(koinAmount)} Coins.`,
+      );
     });
   },
 
@@ -176,7 +179,9 @@ export const mockGameService: GameService = {
       if (transfer.shares <= 0) return invalidAmount();
       ledger.shares[stockId] = settle(ledger.shares[stockId] - transfer.shares);
       ledger.koin += transfer.koin;
-      return success(`Sold ${formatShares(transfer.shares)} ${getStock(stockId).name} shares for ${formatCoins(transfer.koin)} Coins.`);
+      return success(
+        `Sold ${formatShares(transfer.shares)} ${getStock(stockId).name} shares for ${formatCoins(transfer.koin)} Coins.`,
+      );
     });
   },
 
@@ -250,5 +255,11 @@ export const mockGameService: GameService = {
 
   async getLatestEvent() {
     return loadLatestEvent();
+  },
+
+  async resetDemo() {
+    await wait(MOCK_LATENCY_MS);
+    clearMockData();
+    return success("Demo data was reset.");
   },
 };
