@@ -9,7 +9,9 @@ import type { LabelRegistry } from "./labels";
 import { prefersReducedMotion } from "./motion";
 import { effectsFor, type EffectSpec } from "./specialEffects";
 
-const levelScale = (level: LotLevel): number => (level === 0 ? 1 : LEVEL_SCALES[level]);
+const levelScale = (level: LotLevel): number => (level === 0 ? 0.92 : LEVEL_SCALES[level]);
+
+const GHOST_TINT = 0xb4bccb;
 
 const stackSize = (amount: number): number => {
   if (amount <= 0) return 0;
@@ -27,10 +29,8 @@ export class LotView {
   private readonly bridge: VillageBridge;
   private readonly labels: LabelRegistry;
   private readonly building: Phaser.GameObjects.Image;
-  private readonly available: Phaser.GameObjects.Image;
   private readonly availableLabel: Phaser.GameObjects.Text;
-  private readonly decorTwo: Phaser.GameObjects.Image;
-  private readonly decorThree: Phaser.GameObjects.Image;
+  private readonly levelBadge: Phaser.GameObjects.Text;
   private readonly lockBadge: Phaser.GameObjects.Image;
   private readonly tag: Phaser.GameObjects.Text;
   private readonly harvestItems: Phaser.GameObjects.Image[];
@@ -57,22 +57,32 @@ export class LotView {
     this.x = x;
     this.y = y;
 
-    this.available = scene.add.image(x, y, TEXTURE.available).setDepth(DEPTH.lot);
+    this.building = scene.add.image(x, y, TEXTURE.lot(stock.id)).setDepth(DEPTH.lot);
     this.availableLabel = labels.add(
       scene.add
-        .text(x, y - 36, "Available", { fontFamily: bridge.fontFamily, fontSize: "10px", color: COLORS.ink })
+        .text(x, y, "Available", {
+          fontFamily: bridge.fontFamily,
+          fontSize: "10px",
+          color: COLORS.white,
+          backgroundColor: COLORS.ink,
+          padding: { x: 6, y: 4 },
+        })
         .setOrigin(0.5)
         .setDepth(DEPTH.lot + 1),
     );
-    this.building = scene.add.image(x, y, TEXTURE.lot(stock.id)).setDepth(DEPTH.lot).setVisible(false);
-    this.decorTwo = scene.add
-      .image(x, y, TEXTURE.decorTwo)
-      .setDepth(DEPTH.lot + 1)
-      .setVisible(false);
-    this.decorThree = scene.add
-      .image(x, y, TEXTURE.decorThree)
-      .setDepth(DEPTH.lot + 1)
-      .setVisible(false);
+    this.levelBadge = labels.add(
+      scene.add
+        .text(x - LOT_SIZE / 2 + 10, y - LOT_SIZE / 2 + 14, "", {
+          fontFamily: bridge.fontFamily,
+          fontSize: "10px",
+          color: COLORS.ink,
+          backgroundColor: COLORS.gold,
+          padding: { x: 5, y: 3 },
+        })
+        .setOrigin(0, 0.5)
+        .setDepth(DEPTH.lot + 2)
+        .setVisible(false),
+    );
     this.lockBadge = scene.add
       .image(x + 68, y - 56, TEXTURE.lockBadge)
       .setDepth(DEPTH.lot + 2)
@@ -277,15 +287,7 @@ export class LotView {
   }
 
   private parts(): Phaser.GameObjects.GameObject[] {
-    return [
-      this.available,
-      this.availableLabel,
-      this.building,
-      this.decorTwo,
-      this.decorThree,
-      this.lockBadge,
-      this.tag,
-    ];
+    return [this.availableLabel, this.building, this.levelBadge, this.lockBadge, this.tag];
   }
 
   private handleSelect(): void {
@@ -296,25 +298,16 @@ export class LotView {
   private syncBuilding(previous: LotLevel, animate: boolean): void {
     const filled = this.level > 0;
     const targetScale = this.scaleFor(this.level);
-    this.available.setVisible(!filled);
     this.availableLabel.setVisible(!filled);
+    this.building.setVisible(true).setTexture(TEXTURE.lot(this.stock.id));
 
     if (!filled) {
-      if (previous > 0 && animate) {
-        this.building.setVisible(true);
-        this.scene.tweens.add({
-          targets: this.building,
-          alpha: 0,
-          duration: 500,
-          onComplete: () => this.building.setVisible(false).setAlpha(1),
-        });
-      } else {
-        this.building.setVisible(false);
-      }
+      this.building.setTint(GHOST_TINT).setTintMode(Phaser.TintModes.FILL);
+      this.scene.tweens.add({ targets: this.building, scale: targetScale, duration: animate ? 400 : 0 });
       return;
     }
 
-    this.building.setVisible(true).setTexture(TEXTURE.lot(this.stock.id));
+    this.building.clearTint().setTintMode(Phaser.TintModes.MULTIPLY);
     if (previous === 0 && animate) {
       this.building.setScale(targetScale, 0.05);
       this.scene.tweens.add({ targets: this.building, scaleY: targetScale, duration: 600, ease: "Back.easeOut" });
@@ -338,8 +331,7 @@ export class LotView {
   }
 
   private syncDecor(): void {
-    this.decorTwo.setVisible(this.level >= 2);
-    this.decorThree.setVisible(this.level >= 3);
+    this.levelBadge.setVisible(this.level > 0).setText(`Lv ${this.level}`);
   }
 
   private syncHarvest(next: number, animate: boolean): void {

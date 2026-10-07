@@ -125,13 +125,13 @@ const processArtwork = async ([relativePath, id]) => {
 
   await sharp(trimmed)
     .resize(LOT_SIZE, LOT_SIZE, { fit: "contain", position: "bottom", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png({ compressionLevel: 9 })
-    .toFile(join(outputRoot, `${id}.png`));
+    .webp({ quality: 86, alphaQuality: 90, effort: 6 })
+    .toFile(join(outputRoot, `${id}.webp`));
 
   await sharp(trimmed)
     .resize(ICON_SIZE, ICON_SIZE, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png({ compressionLevel: 9 })
-    .toFile(join(outputRoot, "icons", `${id}.png`));
+    .webp({ quality: 88, effort: 6 })
+    .toFile(join(outputRoot, "icons", `${id}.webp`));
 };
 
 mkdirSync(join(outputRoot, "icons"), { recursive: true });

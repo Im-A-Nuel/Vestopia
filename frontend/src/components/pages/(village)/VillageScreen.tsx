@@ -4,9 +4,9 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { COPY } from "@/config";
-import { useMounted, useNarration, useVillageSync } from "@/hooks";
+import { useMounted, useNarration, useQuestProgress, useVillageSync } from "@/hooks";
 import { useGameStore, useSessionStore, useUiStore } from "@/stores";
-import { EventBanner, Hud, LocationBar, MapControls, NpcDialogue } from "./overlays";
+import { EventBanner, Hud, LocationBar, MapControls, NpcDialogue, QuestTracker } from "./overlays";
 
 const VillageMap = dynamic(() => import("./map").then((module) => module.VillageMap), { ssr: false });
 const ShopPanel = dynamic(() => import("./panels").then((module) => module.ShopPanel), { ssr: false });
@@ -42,6 +42,7 @@ export function VillageScreen() {
 
   useVillageSync();
   useNarration();
+  useQuestProgress();
 
   useEffect(() => {
     if (mounted && !address) router.replace("/");
@@ -67,6 +68,7 @@ export function VillageScreen() {
       <div className="relative min-h-0 flex-1">
         <VillageMap />
         <MapControls />
+        <QuestTracker />
         <EventBanner />
         <NpcDialogue />
       </div>

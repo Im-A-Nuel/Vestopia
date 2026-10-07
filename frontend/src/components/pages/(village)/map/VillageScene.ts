@@ -90,7 +90,7 @@ export class VillageScene extends Phaser.Scene {
   }
 
   create(): void {
-    STOCKS.filter((stock) => stock.artwork === "png").forEach((stock) =>
+    STOCKS.filter((stock) => stock.artwork === "webp").forEach((stock) =>
       this.textures.get(TEXTURE.lot(stock.id)).setFilter(Phaser.Textures.FilterMode.LINEAR),
     );
     this.add.rectangle(WORLD.width / 2, WORLD.height / 2, 8000, 6000, HEX.grass).setDepth(DEPTH.base - 1);

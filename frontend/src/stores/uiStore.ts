@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type {
   Banner,
   DayTheme,
+  QuestId,
   BankTab,
   Dialogue,
   DialogueAction,
@@ -28,6 +29,11 @@ interface UiState {
   seenTips: TipId[];
   zoomRequest: ZoomRequest | null;
   theme: DayTheme;
+  quests: QuestId[];
+  questsOpen: boolean;
+  completeQuest: (id: QuestId) => boolean;
+  setQuestsOpen: (open: boolean) => void;
+  resetProgress: () => void;
   toggleTheme: () => void;
   requestZoom: (action: ZoomAction) => void;
   openShop: (focus?: ShopFocus) => void;
@@ -61,6 +67,15 @@ export const useUiStore = create<UiState>()(
       seenTips: [],
       zoomRequest: null,
       theme: "day",
+      quests: [],
+      questsOpen: true,
+      completeQuest: (id) => {
+        if (get().quests.includes(id)) return false;
+        set({ quests: [...get().quests, id] });
+        return true;
+      },
+      setQuestsOpen: (open) => set({ questsOpen: open }),
+      resetProgress: () => set({ quests: [], questsOpen: true, seenTips: [] }),
       toggleTheme: () => set({ theme: get().theme === "day" ? "night" : "day" }),
       requestZoom: (action) => set({ zoomRequest: { id: nextId(), action } }),
       openShop: (focus = {}) => set({ panel: "shop", shopFocus: focus }),
@@ -81,6 +96,14 @@ export const useUiStore = create<UiState>()(
         return true;
       },
     }),
-    { name: "vestopia.ui", partialize: (state) => ({ seenTips: state.seenTips, theme: state.theme }) },
+    {
+      name: "vestopia.ui",
+      partialize: (state) => ({
+        seenTips: state.seenTips,
+        theme: state.theme,
+        quests: state.quests,
+        questsOpen: state.questsOpen,
+      }),
+    },
   ),
 );

@@ -1,4 +1,5 @@
 export * from "./AmountField";
+export * from "./AppToaster";
 export * from "./AnimatedNumber";
 export * from "./GameImage";
 export * from "./Hint";

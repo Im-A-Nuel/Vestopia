@@ -98,6 +98,6 @@ export const shakeCamera = (scene: Phaser.Scene, duration: number, intensity: nu
 export const flashWhite = (scene: Phaser.Scene, target: Phaser.GameObjects.Image, duration = 300): void => {
   target.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL);
   scene.time.delayedCall(duration, () => {
-    if (target.active) target.clearTint();
+    if (target.active) target.clearTint().setTintMode(Phaser.TintModes.MULTIPLY);
   });
 };

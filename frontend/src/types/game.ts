@@ -39,7 +39,7 @@ export type LotLevel = 0 | 1 | 2 | 3;
 
 export type HarvestKind = "chip" | "gold-cart" | "oil-barrel" | "goods-crate" | "harvest-basket";
 
-export type ArtworkFormat = "png" | "svg";
+export type ArtworkFormat = "webp" | "svg";
 
 export type NpcId = "guide" | "merchant" | "banker";
 

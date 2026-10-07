@@ -28,6 +28,8 @@ export type TradeMode = "buy" | "sell";
 
 export type SectorFilter = SectorId | "all";
 
+export type ShopSort = "district" | "price-high" | "price-low" | "dividend" | "change";
+
 export type CollateralMode = "deposit" | "withdraw";
 
 export type LoanMode = "borrow" | "repay";
@@ -37,6 +39,14 @@ export type ZoomAction = "in" | "out" | "reset";
 export interface ZoomRequest {
   id: number;
   action: ZoomAction;
+}
+
+export type QuestId = "first-shares" | "unlock-district" | "collateral" | "borrow" | "harvest";
+
+export interface QuestConfig {
+  id: QuestId;
+  title: string;
+  hint: string;
 }
 
 export type DayTheme = "day" | "night";
