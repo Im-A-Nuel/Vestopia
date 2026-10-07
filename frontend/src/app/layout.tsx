@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito, Press_Start_2P } from "next/font/google";
-import { Toaster } from "sonner";
+import { AppToaster, ThemeController } from "@/components/pages/(shared)";
+import { THEME_SCRIPT } from "./themeScript";
 import "./globals.css";
 
 const uiFont = Nunito({
@@ -36,15 +37,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${uiFont.variable} ${pixelFont.variable} h-full`}>
+    <html lang="en" className={`${uiFont.variable} ${pixelFont.variable} h-full`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full bg-default text-ink">
+        <ThemeController />
         {children}
-        <Toaster
-          position="bottom-right"
-          offset={{ bottom: 72, right: 16 }}
-          mobileOffset={{ bottom: 84, left: 12, right: 12 }}
-          closeButton
-        />
+        <AppToaster />
       </body>
     </html>
   );

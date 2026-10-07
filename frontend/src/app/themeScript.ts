@@ -1,0 +1,1 @@
+export const THEME_SCRIPT = `try{var s=JSON.parse(localStorage.getItem("vestopia.ui")||"{}");document.documentElement.dataset.theme=(s.state&&s.state.theme)==="night"?"night":"day"}catch(e){document.documentElement.dataset.theme="day"}`;

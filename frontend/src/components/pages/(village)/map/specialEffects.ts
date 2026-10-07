@@ -1,4 +1,4 @@
-import type { StockId } from "@/types";
+import type { SectorId, StockConfig, StockId } from "@/types";
 import { TEXTURE } from "./constants";
 
 export type Pulse = "flicker" | "shake" | "dim" | "bob" | "none";
@@ -29,7 +29,7 @@ const spec = (
   ...rest,
 });
 
-export const SPECIAL_EFFECTS: Record<StockId, DirectionalEffects> = {
+const STOCK_EFFECTS: Partial<Record<StockId, DirectionalEffects>> = {
   aapl: {
     up: spec(SPARK, {
       tint: [0xc8453b, 0x5a8f45],
@@ -117,3 +117,15 @@ export const SPECIAL_EFFECTS: Record<StockId, DirectionalEffects> = {
     down: spec(SPARK, { tint: [0x9c7a4d], count: 14, gravityY: 200, speed: { min: 10, max: 50 }, pulse: "dim" }),
   },
 };
+
+const SECTOR_EFFECTS: Record<SectorId, DirectionalEffects> = {
+  tech: STOCK_EFFECTS.nvda as DirectionalEffects,
+  media: STOCK_EFFECTS.nvda as DirectionalEffects,
+  retail: STOCK_EFFECTS.ko as DirectionalEffects,
+  consumer: STOCK_EFFECTS.ko as DirectionalEffects,
+  agri: STOCK_EFFECTS.de as DirectionalEffects,
+  commodity: STOCK_EFFECTS.nem as DirectionalEffects,
+};
+
+export const effectsFor = (stock: StockConfig): DirectionalEffects =>
+  STOCK_EFFECTS[stock.id] ?? SECTOR_EFFECTS[stock.sector];

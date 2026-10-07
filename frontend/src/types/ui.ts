@@ -28,6 +28,8 @@ export type TradeMode = "buy" | "sell";
 
 export type SectorFilter = SectorId | "all";
 
+export type ShopSort = "district" | "price-high" | "price-low" | "dividend" | "change";
+
 export type CollateralMode = "deposit" | "withdraw";
 
 export type LoanMode = "borrow" | "repay";
@@ -37,6 +39,23 @@ export type ZoomAction = "in" | "out" | "reset";
 export interface ZoomRequest {
   id: number;
   action: ZoomAction;
+}
+
+export type QuestId = "first-shares" | "unlock-district" | "collateral" | "borrow" | "harvest";
+
+export interface QuestConfig {
+  id: QuestId;
+  title: string;
+  hint: string;
+}
+
+export type DayTheme = "day" | "night";
+
+export interface MapTree {
+  x: number;
+  y: number;
+  scale: number;
+  variant: number;
 }
 
 export type ConnectionStatus = "online" | "reconnecting";
@@ -57,6 +76,8 @@ export interface VillageBridge {
   harvest: (stockId: StockId) => void;
   reportError: () => void;
   subscribeZoom: (listener: (action: ZoomAction) => void) => () => void;
+  getTheme: () => DayTheme;
+  subscribeTheme: (listener: (theme: DayTheme) => void) => () => void;
 }
 
 export interface ActivityEntry {

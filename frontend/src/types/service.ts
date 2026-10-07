@@ -23,7 +23,16 @@ export interface ActionResult {
   code?: ActionErrorCode;
 }
 
-export type MarketEventId = "tech_boom" | "gold_crash" | "drought" | "holiday_sale" | "reset" | "harvest_day";
+export type MarketEventId =
+  | "tech_boom"
+  | "gold_crash"
+  | "drought"
+  | "holiday_sale"
+  | "streaming_boom"
+  | "holiday_rush"
+  | "retail_slowdown"
+  | "reset"
+  | "harvest_day";
 
 export interface MarketEventPreset {
   id: MarketEventId;

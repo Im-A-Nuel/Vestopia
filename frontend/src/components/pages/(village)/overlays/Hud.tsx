@@ -6,6 +6,7 @@ import { formatCoins, formatSigned } from "@/lib";
 import { useGameStore, useUiStore } from "@/stores";
 import type { WeatherState } from "@/types";
 import { AnimatedNumber, GameImage } from "@/components/pages/(shared)";
+import { ThemeToggle } from "./ThemeToggle";
 
 const WEATHER_LABELS: Record<WeatherState, string> = {
   sunny: "Sunny",
@@ -50,7 +51,7 @@ export function Hud() {
 
   return (
     <header className="px-safe pt-safe flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line bg-surface pb-2 short:gap-y-0">
-      <p className="pixel-text hidden text-xs text-main sm:block">{APP_NAME}</p>
+      <p className="pixel-text hidden text-xs text-accent sm:block">{APP_NAME}</p>
 
       <dl className="grid min-w-0 flex-1 grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-1">
         <div className="relative">
@@ -111,6 +112,7 @@ export function Hud() {
             Harvest All ({formatCoins(player.totalPendingHarvest)})
           </button>
         )}
+        <ThemeToggle />
         <button type="button" className="btn btn-secondary" onClick={openInfo}>
           Info
         </button>

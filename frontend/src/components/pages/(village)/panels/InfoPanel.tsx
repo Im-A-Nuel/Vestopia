@@ -20,6 +20,7 @@ export function InfoPanel() {
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [resetting, setResetting] = useState(false);
   const closePanel = useUiStore((state) => state.closePanel);
+  const resetProgress = useUiStore((state) => state.resetProgress);
 
   const signOut = (): void => {
     closePanel();
@@ -34,6 +35,7 @@ export function InfoPanel() {
     setResetting(false);
     if (result.status === "error") return;
     toast.success(result.message);
+    resetProgress();
     signOut();
   };
 

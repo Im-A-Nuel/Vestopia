@@ -1,10 +1,9 @@
+import { PLAZA } from "@/config";
 import type { HarvestKind, SectorId, StockId } from "@/types";
 
 export const GRASS_CSS = "#7BB661";
 
 export const HEX = { grass: 0x7bb661, storm: 0x1d2540, white: 0xffffff } as const;
-
-export const LOT_OFFSET_X = 128;
 
 export const MIN_ZOOM = 0.62;
 
@@ -12,16 +11,15 @@ export const MAX_ZOOM = 1.8;
 
 export const ZOOM_STEP = 1.25;
 
-export const LOT_OFFSET_Y = 6;
-
 export const BUILDING_POSITIONS = {
-  home: { x: 800, y: 490 },
-  shop: { x: 640, y: 490 },
-  bank: { x: 960, y: 490 },
+  home: { x: PLAZA.x, y: PLAZA.y - 10 },
+  shop: { x: PLAZA.x - 170, y: PLAZA.y - 10 },
+  bank: { x: PLAZA.x + 170, y: PLAZA.y - 10 },
 } as const;
 
 export const DEPTH = {
   base: 0,
+  trees: 0.5,
   ground: 1,
   lot: 10,
   label: 20,
@@ -29,7 +27,10 @@ export const DEPTH = {
   fog: 30,
   lock: 31,
   fx: 40,
+  night: 48,
+  nightGlow: 49,
   weather: 50,
+  birds: 53,
   flash: 60,
 } as const;
 
@@ -58,6 +59,12 @@ export const TEXTURE = {
   cloud: "fx-cloud",
   rain: "fx-rain",
   rainbow: "fx-rainbow",
+  glow: "fx-glow",
+  firefly: "fx-firefly",
+  butterfly: "fx-butterfly",
+  shimmer: "fx-shimmer",
+  tree: (variant: number): string => `map-tree-${variant}`,
+  bird: (frame: number): string => `fx-bird-${frame}`,
   tapHand: "harvest-tap-hand",
   lot: (id: StockId): string => `lot-${id}`,
   ground: (id: SectorId): string => `ground-${id}`,

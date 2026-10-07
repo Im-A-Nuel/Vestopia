@@ -1,0 +1,40 @@
+{
+  "world": { "width": 3200, "height": 1800 },
+  "cell": 208,
+  "margin": { "side": 24, "top": 56, "bottom": 24 },
+  "plaza": { "x": 1640, "y": 900 },
+  "districts": [
+    { "id": "tech", "centerX": 700, "top": 140, "cols": 4, "lots": 7, "entrance": "bottom" },
+    { "id": "media", "centerX": 1760, "top": 80, "cols": 4, "lots": 7, "entrance": "bottom" },
+    { "id": "retail", "centerX": 2620, "top": 640, "cols": 4, "lots": 8, "entrance": "left" },
+    { "id": "commodity", "centerX": 560, "top": 820, "cols": 3, "lots": 3, "entrance": "right" },
+    { "id": "consumer", "centerX": 980, "top": 1360, "cols": 4, "lots": 4, "entrance": "top" },
+    { "id": "agri", "centerX": 1900, "top": 1420, "cols": 2, "lots": 2, "entrance": "top" }
+  ],
+  "terrain": {
+    "lake": { "x": 2660, "y": 1500, "rx": 320, "ry": 180 },
+    "stream": [
+      [2520, 1640],
+      [2440, 1720],
+      [2380, 1800]
+    ],
+    "hills": [
+      { "x": 2880, "y": 260, "rx": 300, "ry": 200 },
+      { "x": 200, "y": 1560, "rx": 220, "ry": 150 }
+    ],
+    "forests": [
+      { "x": 110, "y": 220, "rx": 160, "ry": 260 },
+      { "x": 2420, "y": 300, "rx": 160, "ry": 170 },
+      { "x": 3100, "y": 1350, "rx": 120, "ry": 200 }
+    ],
+    "rocks": { "x": 560, "y": 1210, "rx": 360, "ry": 70 },
+    "fields": [
+      { "x": 1460, "y": 1440, "width": 180, "height": 260 },
+      { "x": 2160, "y": 1180, "width": 180, "height": 180 }
+    ],
+    "meadows": [
+      { "x": 1640, "y": 680, "rx": 260, "ry": 70 },
+      { "x": 1300, "y": 1120, "rx": 200, "ry": 90 }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import { ASSETS } from "@/config";
-import { formatPercent, formatPrice, formatShares } from "@/lib";
+import { formatPercent, formatPrice, formatRate, formatShares } from "@/lib";
 import type { StockConfig, StockView } from "@/types";
 import { GameImage } from "./GameImage";
 
@@ -32,7 +32,8 @@ export function StockRow({ config, view, selected, onSelect }: StockRowProps) {
       <span className="min-w-0 flex-1">
         <span className="block truncate font-bold">{config.name}</span>
         <span className="block text-xs text-soft">
-          {config.ticker} - {owned > 0 ? `${formatShares(owned)} owned` : "Not owned"}
+          {config.ticker} - Dividend {formatRate(config.dividendRate)} -{" "}
+          {owned > 0 ? `${formatShares(owned)} owned` : "Not owned"}
         </span>
       </span>
       <span className="text-right">

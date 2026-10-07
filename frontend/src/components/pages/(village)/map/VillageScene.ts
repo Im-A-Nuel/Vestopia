@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-import { ASSETS, SECTORS, STOCKS, WORLD } from "@/config";
+import { ASSETS, PLAZA, SECTORS, STOCKS, WORLD } from "@/config";
 import { diffPlayers } from "@/lib";
-import type { GameChange, PlayerView, SectorId, StockId, VillageBridge, ZoomAction } from "@/types";
+import type { DayTheme, GameChange, MapTree, PlayerView, SectorId, StockId, VillageBridge, ZoomAction } from "@/types";
 import { BUILDING_POSITIONS, COLORS, DEPTH, HEX, MAX_ZOOM, MIN_ZOOM, TEXTURE, ZOOM_STEP } from "./constants";
 import { DistrictView } from "./DistrictView";
 import { flyCoins, hudPoint } from "./effects";
@@ -9,12 +9,17 @@ import { prefersReducedMotion } from "./motion";
 import type { LotView } from "./LotView";
 import { onTap } from "./input";
 import { LabelRegistry } from "./labels";
+import { AmbientLayer } from "./AmbientLayer";
+import { NightLayer } from "./NightLayer";
 import { WeatherLayer } from "./WeatherLayer";
 
 interface ImageEntry {
   key: string;
   url: string;
+  vector?: boolean;
 }
+
+const VECTOR_SIZE = { width: 384, height: 320 } as const;
 
 const buildManifest = (): ImageEntry[] => {
   const entries: ImageEntry[] = [
@@ -37,7 +42,7 @@ const buildManifest = (): ImageEntry[] => {
   ];
   SECTORS.forEach((sector) => entries.push({ key: TEXTURE.ground(sector.id), url: ASSETS.district(sector.id) }));
   STOCKS.forEach((stock) => {
-    entries.push({ key: TEXTURE.lot(stock.id), url: ASSETS.lot(stock.id) });
+    entries.push({ key: TEXTURE.lot(stock.id), url: ASSETS.lot(stock.id), vector: stock.artwork === "svg" });
     entries.push({ key: TEXTURE.harvest(stock.harvest), url: ASSETS.harvest(stock.harvest) });
   });
   return entries;
@@ -55,6 +60,9 @@ export class VillageScene extends Phaser.Scene {
   private fitZoom = 1;
   private pinchDistance = 0;
   private unsubscribeZoom: (() => void) | null = null;
+  private unsubscribeTheme: (() => void) | null = null;
+  private ambient: AmbientLayer | null = null;
+  private nightLayer: NightLayer | null = null;
 
   constructor(bridge: VillageBridge) {
     super("village");
@@ -62,16 +70,29 @@ export class VillageScene extends Phaser.Scene {
   }
 
   preload(): void {
+    this.load.json("trees", "/assets/map/trees.json");
+    [0, 1].forEach((variant) => this.load.image(TEXTURE.tree(variant), `/assets/map/tree-${variant}.png`));
+    [0, 1].forEach((frame) => this.load.image(TEXTURE.bird(frame), `/assets/fx/bird-${frame}.png`));
+    [
+      [TEXTURE.glow, "glow"],
+      [TEXTURE.firefly, "firefly"],
+      [TEXTURE.butterfly, "butterfly"],
+      [TEXTURE.shimmer, "shimmer"],
+    ].forEach(([key, name]) => this.load.image(key, `/assets/fx/${name}.png`));
     this.load.on("loaderror", () => this.bridge.reportError());
     const loaded = new Set<string>();
-    buildManifest().forEach(({ key, url }) => {
+    buildManifest().forEach(({ key, url, vector }) => {
       if (loaded.has(key)) return;
       loaded.add(key);
-      this.load.image(key, url);
+      if (vector) this.load.svg(key, url, VECTOR_SIZE);
+      else this.load.image(key, url);
     });
   }
 
   create(): void {
+    STOCKS.filter((stock) => stock.artwork === "webp").forEach((stock) =>
+      this.textures.get(TEXTURE.lot(stock.id)).setFilter(Phaser.Textures.FilterMode.LINEAR),
+    );
     this.add.rectangle(WORLD.width / 2, WORLD.height / 2, 8000, 6000, HEX.grass).setDepth(DEPTH.base - 1);
     this.add.image(WORLD.width / 2, WORLD.height / 2, TEXTURE.base).setDepth(DEPTH.base);
     this.createBuildings();
@@ -84,6 +105,8 @@ export class VillageScene extends Phaser.Scene {
       district.lots.forEach((lot) => this.lots.set(lot.stock.id, lot));
     });
 
+    this.ambient = new AmbientLayer(this, (this.cache.json.get("trees") as MapTree[] | undefined) ?? []);
+    this.nightLayer = new NightLayer(this);
     this.weather = new WeatherLayer(this);
 
     const player = this.bridge.getPlayer();
@@ -91,6 +114,8 @@ export class VillageScene extends Phaser.Scene {
 
     this.unsubscribe = this.bridge.subscribe((next, previous) => this.handleUpdate(next, previous));
     this.unsubscribeZoom = this.bridge.subscribeZoom((action) => this.handleZoom(action));
+    this.applyTheme(this.bridge.getTheme(), false);
+    this.unsubscribeTheme = this.bridge.subscribeTheme((theme) => this.applyTheme(theme, true));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.events.once(Phaser.Scenes.Events.DESTROY, () => this.cleanup());
   }
@@ -159,8 +184,8 @@ export class VillageScene extends Phaser.Scene {
       this.tweens.killTweensOf(this.center);
       this.tweens.add({
         targets: this.center,
-        x: WORLD.width / 2,
-        y: WORLD.height / 2,
+        x: PLAZA.x,
+        y: PLAZA.y,
         duration: 900,
         ease: "Sine.easeInOut",
         onUpdate: () => this.clampCenter(),
@@ -219,7 +244,7 @@ export class VillageScene extends Phaser.Scene {
   }
 
   private handleZoom(action: ZoomAction): void {
-    if (action === "reset") this.fitCamera();
+    if (action === "reset") this.setZoom(this.fitZoom);
     else this.setZoom(this.cameras.main.zoom * (action === "in" ? ZOOM_STEP : 1 / ZOOM_STEP));
   }
 
@@ -233,7 +258,7 @@ export class VillageScene extends Phaser.Scene {
 
   private fitCamera(): void {
     this.fitZoom = Math.min(this.scale.width / WORLD.width, this.scale.height / WORLD.height);
-    this.center = { x: WORLD.width / 2, y: WORLD.height / 2 };
+    this.center = { x: PLAZA.x, y: PLAZA.y };
     this.setZoom(Math.max(this.fitZoom, MIN_ZOOM));
   }
 
@@ -290,11 +315,25 @@ export class VillageScene extends Phaser.Scene {
     this.weather?.set(player.weather, animate);
   }
 
+  update(time: number): void {
+    this.ambient?.update(time);
+  }
+
+  private applyTheme(theme: DayTheme, animate: boolean): void {
+    const night = theme === "night";
+    this.nightLayer?.set(night, animate);
+    this.ambient?.setNight(night);
+    this.lots.forEach((lot) => lot.setNight(night));
+  }
+
   private cleanup(): void {
     this.unsubscribe?.();
     this.unsubscribe = null;
     this.unsubscribeZoom?.();
     this.unsubscribeZoom = null;
+    this.unsubscribeTheme?.();
+    this.unsubscribeTheme = null;
+    this.ambient?.destroy();
     this.weather?.destroy();
   }
 }

@@ -1,3 +1,5 @@
+import { LAYOUT } from "./layout";
+import { getStock } from "./stocks";
 import type { HarvestKind, NpcId, SectorId, StockId, WeatherState } from "@/types";
 
 export const ASSET_EXTENSION = "png";
@@ -12,15 +14,16 @@ export const ASSETS = {
     bank: assetPath("buildings", "bank"),
   },
   district: (sector: SectorId): string => assetPath("districts", `${sector}-ground`),
-  lot: (stock: StockId): string => assetPath("lots", stock),
+  lot: (stock: StockId): string => `/assets/artwork/${stock}.${getStock(stock).artwork ?? "webp"}`,
   lotAvailable: assetPath("lots", "available"),
   decor: { two: assetPath("lots", "decor-lv2"), three: assetPath("lots", "decor-lv3") },
   harvest: (kind: HarvestKind): string => assetPath("harvest", kind),
   tapHand: assetPath("harvest", "tap-hand"),
-  stockIcon: (stock: StockId): string => assetPath("icons", stock),
+  stockIcon: (stock: StockId): string => `/assets/artwork/icons/${stock}.${getStock(stock).artwork ?? "webp"}`,
   koinIcon: assetPath("icons", "koin"),
   sectorIcon: (sector: SectorId): string => assetPath("icons", `sector-${sector}`),
   weatherIcon: (weather: WeatherState): string => assetPath("ui", `weather-${weather}`),
+  themeIcon: { day: assetPath("ui", "weather-sunny"), night: assetPath("ui", "theme-night") },
   npc: (npc: NpcId): string => assetPath("npc", npc),
   fx: {
     fog: assetPath("fx", "fog-locked"),
@@ -37,4 +40,4 @@ export const ASSETS = {
 
 export const LOT_SIZE = 192;
 
-export const WORLD = { width: 1600, height: 1000 } as const;
+export const WORLD = LAYOUT.world;

@@ -16,7 +16,7 @@ export function GameImage({ src, alt, width, height = width, className, priority
       alt={alt}
       width={width}
       height={height}
-      className={className}
+      className={src.includes("/artwork/") ? `render-smooth ${className ?? ""}`.trim() : className}
       priority={priority}
       loading={priority ? "eager" : "lazy"}
       unoptimized

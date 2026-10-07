@@ -12,8 +12,8 @@ interface ModalProps {
 }
 
 const BACKDROP_TONES: Record<WeatherState | "default", string> = {
-  default: "bg-ink/45",
-  sunny: "bg-ink/40",
+  default: "bg-shade/50",
+  sunny: "bg-shade/40",
   cloudy: "bg-storm/60",
   stormy: "bg-storm/80",
 };

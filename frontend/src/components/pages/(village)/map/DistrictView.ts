@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-import { getStocksBySector } from "@/config";
+import { getStocksBySector, lotCenter } from "@/config";
 import type { SectorConfig, VillageBridge } from "@/types";
-import { COLORS, DEPTH, LOT_OFFSET_X, LOT_OFFSET_Y, TEXTURE } from "./constants";
+import { COLORS, DEPTH, TEXTURE } from "./constants";
 import { burst } from "./effects";
 import { onTap } from "./input";
 import type { LabelRegistry } from "./labels";
@@ -21,11 +21,12 @@ export class DistrictView {
     this.scene = scene;
     this.sector = sector;
     const { x, y } = sector.center;
+    const { frame } = sector;
 
-    scene.add.image(x, y, TEXTURE.ground(sector.id)).setDepth(DEPTH.ground);
+    scene.add.image(x, y, TEXTURE.ground(sector.id)).setDisplaySize(frame.width, frame.height).setDepth(DEPTH.ground);
     labels.add(
       scene.add
-        .text(x, y - 112, sector.district, {
+        .text(x, frame.top + 28, sector.district, {
           fontFamily: bridge.fontFamily,
           fontSize: "12px",
           color: COLORS.white,
@@ -36,18 +37,22 @@ export class DistrictView {
         .setDepth(DEPTH.lock + 2),
     );
 
-    this.lots = getStocksBySector(sector.id).map(
-      (stock, index) =>
-        new LotView(scene, bridge, labels, stock, x + (index === 0 ? -LOT_OFFSET_X : LOT_OFFSET_X), y + LOT_OFFSET_Y),
-    );
+    this.lots = getStocksBySector(sector.id).map((stock, index) => {
+      const position = lotCenter(frame, index);
+      return new LotView(scene, bridge, labels, stock, position.x, position.y);
+    });
 
-    this.fog = scene.add.image(x, y, TEXTURE.fog).setDepth(DEPTH.fog).setAlpha(0);
+    this.fog = scene.add
+      .image(x, y, TEXTURE.fog)
+      .setDisplaySize(frame.width + 24, frame.height + 24)
+      .setDepth(DEPTH.fog)
+      .setAlpha(0);
     this.padlock = scene.add
       .image(x, y + 24, TEXTURE.padlock)
       .setDepth(DEPTH.lock)
       .setAlpha(0);
     this.hit = scene.add
-      .zone(x, y, 512, 256)
+      .zone(x, y, frame.width, frame.height)
       .setDepth(DEPTH.lock + 1)
       .setInteractive({ useHandCursor: true });
     onTap(this.hit, () => bridge.openDistrict(sector.id));
@@ -95,13 +100,16 @@ export class DistrictView {
       ease: "Quad.easeIn",
       onComplete: () => this.padlock.setPosition(x, y + 24),
     });
+    const baseScaleX = this.fog.scaleX;
+    const baseScaleY = this.fog.scaleY;
     this.scene.tweens.add({
       targets: this.fog,
       alpha: 0,
-      scale: 1.25,
+      scaleX: baseScaleX * 1.25,
+      scaleY: baseScaleY * 1.25,
       delay: 700,
       duration: 1000,
-      onComplete: () => this.fog.setScale(1),
+      onComplete: () => this.fog.setScale(baseScaleX, baseScaleY),
     });
     this.scene.time.delayedCall(900, () =>
       burst(this.scene, x, y, {

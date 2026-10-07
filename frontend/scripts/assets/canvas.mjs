@@ -258,4 +258,29 @@ export class Pixels {
     const source = factor === 1 ? this : this.scaled(factor);
     return encodePng(source.width, source.height, source.data);
   }
+
+  toSvg(factor = 1) {
+    const hex = (value) => value.toString(16).padStart(2, "0");
+    const rects = [];
+    for (let y = 0; y < this.height; y += 1) {
+      let x = 0;
+      while (x < this.width) {
+        const [r, g, b, a] = this.get(x, y);
+        if (a === 0) {
+          x += 1;
+          continue;
+        }
+        let run = 1;
+        while (x + run < this.width) {
+          const next = this.get(x + run, y);
+          if (next[0] !== r || next[1] !== g || next[2] !== b || next[3] !== a) break;
+          run += 1;
+        }
+        const opacity = a === 255 ? "" : ` fill-opacity="${(a / 255).toFixed(3)}"`;
+        rects.push(`<rect x="${x}" y="${y}" width="${run}" height="1" fill="#${hex(r)}${hex(g)}${hex(b)}"${opacity}/>`);
+        x += run;
+      }
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.width * factor}" height="${this.height * factor}" viewBox="0 0 ${this.width} ${this.height}" shape-rendering="crispEdges">${rects.join("")}</svg>`;
+  }
 }

@@ -15,8 +15,27 @@
   --color-caution: #8a5a00;
   --color-grass: #7bb661;
   --color-storm: #1d2540;
+  --color-accent: #3f6b30;
+  --color-shade: #2b2b3a;
   --radius-control: 8px;
   --radius-panel: 14px;
+}
+
+@custom-variant night (&:where([data-theme="night"], [data-theme="night"] *));
+
+:root[data-theme="night"] {
+  color-scheme: dark;
+  --color-default: #161b26;
+  --color-surface: #1f2533;
+  --color-muted: #2a3142;
+  --color-line: #3a4357;
+  --color-ink: #eef1f6;
+  --color-soft: #b6bfce;
+  --color-accent: #a6d98a;
+  --color-positive: #86d993;
+  --color-negative: #ff9a91;
+  --color-caution: #ffc861;
+  --color-shade: #0b0f18;
 }
 
 @custom-variant short (@media (max-height: 500px));
@@ -60,6 +79,10 @@ button:disabled {
 
 img {
   image-rendering: pixelated;
+}
+
+@utility render-smooth {
+  image-rendering: auto;
 }
 
 @utility px-safe {
@@ -116,7 +139,7 @@ img {
 }
 
 @utility btn-caution {
-  background: var(--color-caution);
+  background: #8a5a00;
   color: #ffffff;
   &:hover:not(:disabled) {
     background: #6e4700;
