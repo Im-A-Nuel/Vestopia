@@ -1,12 +1,45 @@
-export type SectorId = "tech" | "commodity" | "consumer" | "agri";
+export type SectorId = "tech" | "commodity" | "consumer" | "agri" | "retail" | "media";
 
-export type StockId = "aapl" | "nvda" | "nem" | "xom" | "ko" | "pg" | "de" | "adm";
+export type StockId =
+  | "aapl"
+  | "nvda"
+  | "msft"
+  | "amd"
+  | "avgo"
+  | "intc"
+  | "csco"
+  | "nem"
+  | "xom"
+  | "cat"
+  | "ko"
+  | "pg"
+  | "wmt"
+  | "cost"
+  | "de"
+  | "adm"
+  | "amzn"
+  | "ebay"
+  | "gme"
+  | "hd"
+  | "mcd"
+  | "nke"
+  | "sbux"
+  | "tsla"
+  | "dis"
+  | "googl"
+  | "meta"
+  | "nflx"
+  | "rddt"
+  | "spot"
+  | "vz";
 
 export type WeatherState = "sunny" | "cloudy" | "stormy";
 
 export type LotLevel = 0 | 1 | 2 | 3;
 
 export type HarvestKind = "chip" | "gold-cart" | "oil-barrel" | "goods-crate" | "harvest-basket";
+
+export type ArtworkFormat = "png" | "svg";
 
 export type NpcId = "guide" | "merchant" | "banker";
 
@@ -19,6 +52,7 @@ export interface StockConfig {
   basePrice: number;
   dividendRate: number;
   harvest: HarvestKind;
+  artwork: ArtworkFormat | null;
 }
 
 export interface SectorConfig {
@@ -28,6 +62,16 @@ export interface SectorConfig {
   lockedHint: string;
   lore: string;
   center: { x: number; y: number };
+  frame: DistrictFrame;
+}
+
+export interface DistrictFrame {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  cols: number;
+  rows: number;
 }
 
 export interface StockView {

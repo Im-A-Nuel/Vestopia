@@ -7,7 +7,7 @@ import { burst, flashWhite, floatText, shakeCamera } from "./effects";
 import { onTap } from "./input";
 import type { LabelRegistry } from "./labels";
 import { prefersReducedMotion } from "./motion";
-import { SPECIAL_EFFECTS, type EffectSpec } from "./specialEffects";
+import { effectsFor, type EffectSpec } from "./specialEffects";
 
 const levelScale = (level: LotLevel): number => (level === 0 ? 1 : LEVEL_SCALES[level]);
 
@@ -36,6 +36,8 @@ export class LotView {
   private readonly harvestItems: Phaser.GameObjects.Image[];
   private readonly tapHand: Phaser.GameObjects.Image;
   private readonly hit: Phaser.GameObjects.Zone;
+  private readonly glow: Phaser.GameObjects.Image;
+  private night = false;
   private level: LotLevel = 0;
   private stack = 0;
   private visibleLot = false;
@@ -108,6 +110,13 @@ export class LotView {
       .setInteractive({ useHandCursor: true });
     onTap(this.hit, () => this.handleSelect());
 
+    this.glow = scene.add
+      .image(x, y - 10, TEXTURE.glow)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setScale(1.3)
+      .setAlpha(0)
+      .setDepth(DEPTH.nightGlow);
+
     this.parts().forEach((part) => (part as Phaser.GameObjects.Image).setAlpha(0));
     this.setInputEnabled(false);
   }
@@ -134,6 +143,17 @@ export class LotView {
     this.syncDecor();
     this.lockBadge.setVisible(view.collateralShares > 1e-6);
     this.syncHarvest(stackSize(view.pendingHarvest), animate);
+    this.refreshGlow();
+  }
+
+  setNight(night: boolean): void {
+    this.night = night;
+    this.refreshGlow();
+  }
+
+  private refreshGlow(): void {
+    const lit = this.night && this.visibleLot && this.level > 0;
+    this.scene.tweens.add({ targets: this.glow, alpha: lit ? 0.55 : 0, duration: 900 });
   }
 
   floatChange(text: string, color: string): void {
@@ -186,7 +206,7 @@ export class LotView {
     }
     if (Math.abs(percent) > 20) {
       shakeCamera(this.scene, 260, 0.0025);
-      this.playSpecial(SPECIAL_EFFECTS[this.stock.id][rising ? "up" : "down"]);
+      this.playSpecial(effectsFor(this.stock)[rising ? "up" : "down"]);
     }
   }
 
@@ -275,7 +295,7 @@ export class LotView {
 
   private syncBuilding(previous: LotLevel, animate: boolean): void {
     const filled = this.level > 0;
-    const targetScale = levelScale(this.level);
+    const targetScale = this.scaleFor(this.level);
     this.available.setVisible(!filled);
     this.availableLabel.setVisible(!filled);
 
@@ -311,6 +331,10 @@ export class LotView {
       duration: animate ? 360 : 0,
       ease: "Back.easeOut",
     });
+  }
+
+  private scaleFor(level: LotLevel): number {
+    return levelScale(level) * (LOT_SIZE / Math.max(this.building.width, this.building.height));
   }
 
   private syncDecor(): void {

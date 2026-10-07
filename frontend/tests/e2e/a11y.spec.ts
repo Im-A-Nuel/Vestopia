@@ -26,3 +26,17 @@ test("village and panels have no detectable accessibility violations", async ({ 
     await page.keyboard.press("Escape");
   }
 });
+
+test("night theme keeps the village and panels accessible", async ({ page }) => {
+  await startGame(page);
+  await page.getByRole("button", { name: "Switch to night" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
+  await audit(page);
+  for (const name of ["Village Shop", "Village Bank"]) {
+    await page.getByRole("button", { name }).first().click();
+    await audit(page);
+    await page.keyboard.press("Escape");
+  }
+  await page.getByRole("button", { name: "Switch to day" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "day");
+});

@@ -161,6 +161,33 @@ export const iconSectorAgri = () => {
   return finish(c);
 };
 
+export const iconSectorMedia = () => {
+  const c = small();
+  c.box(2, 3, 12, 9, P.slate);
+  c.rect(3, 4, 10, 7, P.sky);
+  c.poly(
+    [
+      [7, 5],
+      [10, 7.5],
+      [7, 10],
+    ],
+    P.white,
+  );
+  c.rect(6, 12, 4, 1, P.slate);
+  c.rect(4, 13, 8, 1, P.stoneDeep);
+  return finish(c);
+};
+
+export const iconSectorRetail = () => {
+  const c = small();
+  c.frame(5, 2, 6, 5, P.woodDark);
+  c.rect(6, 3, 4, 4, "#00000000");
+  c.box(3, 5, 10, 9, P.orange);
+  c.hline(3, 8, 10, P.gold);
+  c.px(4, 6, P.goldLight);
+  return finish(c);
+};
+
 export const weatherSunny = () => {
   const c = small();
   [
@@ -347,4 +374,67 @@ export const fxRainbow = () => {
     }
   }
   return c;
+};
+
+export const fxBird = (wingsUp) => {
+  const c = new Pixels(9, 5);
+  if (wingsUp) {
+    c.line(0, 0, 4, 3, P.ink);
+    c.line(4, 3, 8, 0, P.ink);
+  } else {
+    c.line(0, 3, 4, 2, P.ink);
+    c.line(4, 2, 8, 3, P.ink);
+    c.px(4, 3, P.ink);
+  }
+  return c;
+};
+
+export const fxGlow = () => {
+  const c = new Pixels(32, 32);
+  for (let y = 0; y < 32; y += 1) {
+    for (let x = 0; x < 32; x += 1) {
+      const distance = Math.hypot(x + 0.5 - 16, y + 0.5 - 16) / 16;
+      if (distance < 1) c.set(x, y, [255, 214, 140, Math.round((1 - distance) ** 2 * 255)]);
+    }
+  }
+  return c;
+};
+
+export const fxFirefly = () => {
+  const c = new Pixels(3, 3);
+  c.set(1, 1, "#fff6b0");
+  [
+    [0, 1],
+    [2, 1],
+    [1, 0],
+    [1, 2],
+  ].forEach(([x, y]) => c.set(x, y, "#f2e06088"));
+  return c;
+};
+
+export const fxButterfly = () => {
+  const c = new Pixels(5, 4);
+  c.rect(0, 0, 2, 2, P.pink);
+  c.rect(3, 0, 2, 2, P.pink);
+  c.px(1, 2, P.white);
+  c.px(3, 2, P.white);
+  c.vline(2, 0, 4, P.ink);
+  return c;
+};
+
+export const fxShimmer = () => {
+  const c = new Pixels(4, 1);
+  c.hline(0, 0, 4, "#ffffffcc");
+  return c;
+};
+
+export const iconMoon = () => {
+  const c = new Pixels(16, 16);
+  c.ellipse(8, 8, 6, 6, P.goldLight);
+  c.ellipse(11, 6, 5, 5, "#00000000");
+  c.mapPixels((pixel, x, y) => (pixel[3] > 0 && Math.hypot(x + 0.5 - 11, y + 0.5 - 6) < 5 ? [0, 0, 0, 0] : null));
+  c.px(5, 9, P.gold);
+  c.px(13, 11, P.white);
+  c.px(12, 2, P.white);
+  return c.outline(INK);
 };

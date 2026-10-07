@@ -8,3 +8,4 @@ export * from "./NpcSpeech";
 export * from "./SegmentedControl";
 export * from "./Stat";
 export * from "./StockRow";
+export * from "./ThemeController";

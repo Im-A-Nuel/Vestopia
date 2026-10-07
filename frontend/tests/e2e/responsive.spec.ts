@@ -38,7 +38,7 @@ for (const viewport of VIEWPORTS) {
 
       const buttons = nav.getByRole("button");
       const count = await buttons.count();
-      expect(count).toBe(6);
+      expect(count).toBe(8);
       for (let index = 0; index < count; index += 1) {
         const button = buttons.nth(index);
         await button.scrollIntoViewIfNeeded();

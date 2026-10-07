@@ -4,8 +4,7 @@ import { ASSETS, SECTORS } from "@/config";
 import { useGameStore, useUiStore } from "@/stores";
 import { GameImage } from "@/components/pages/(shared)";
 
-const LOCATION_BUTTON =
-  "btn min-w-0 !px-2 !py-1.5 text-sm sm:shrink-0 sm:!px-4 sm:text-[0.9375rem] short:shrink-0 short:!px-4";
+const LOCATION_BUTTON = "btn shrink-0 !px-3 !py-1.5 text-sm sm:!px-4 sm:text-[0.9375rem]";
 
 export function LocationBar() {
   const player = useGameStore((state) => state.player);
@@ -18,7 +17,7 @@ export function LocationBar() {
   return (
     <nav
       aria-label="Village locations"
-      className="px-safe pb-safe grid grid-cols-3 gap-2 border-t border-line bg-surface pt-2 sm:flex sm:overflow-x-auto short:flex short:overflow-x-auto"
+      className="px-safe pb-safe flex snap-x gap-2 overflow-x-auto border-t border-line bg-surface pt-2"
     >
       <button type="button" className={`${LOCATION_BUTTON} btn-primary`} onClick={() => openShop({})}>
         Village Shop
@@ -36,7 +35,7 @@ export function LocationBar() {
             onClick={() => openDistrict(sector.id)}
           >
             <GameImage src={ASSETS.sectorIcon(sector.id)} alt="" width={20} />
-            <span className="flex flex-col items-start leading-tight sm:flex-row sm:items-center sm:gap-2 short:flex-row short:items-center short:gap-2">
+            <span className="flex items-center gap-2 leading-tight">
               {sector.district}
               {!unlocked && <span className="text-xs font-semibold text-soft">Locked</span>}
             </span>

@@ -23,6 +23,11 @@ const createBridge = (fontFamily: string, onError: () => void): VillageBridge =>
   openBank: () => useUiStore.getState().openBank(),
   harvest: (stockId) => void useGameStore.getState().harvest(stockId),
   reportError: onError,
+  getTheme: () => useUiStore.getState().theme,
+  subscribeTheme: (listener) =>
+    useUiStore.subscribe((state, previous) => {
+      if (state.theme !== previous.theme) listener(state.theme);
+    }),
   subscribeZoom: (listener) =>
     useUiStore.subscribe((state, previous) => {
       if (state.zoomRequest && state.zoomRequest.id !== previous.zoomRequest?.id) listener(state.zoomRequest.action);

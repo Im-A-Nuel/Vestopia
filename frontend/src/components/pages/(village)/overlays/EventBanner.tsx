@@ -23,7 +23,7 @@ export function EventBanner() {
       role="status"
       className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-4 pt-3"
     >
-      <p className="animate-banner-drop flex max-w-xl items-center gap-3 rounded-control bg-ink px-4 py-3 text-sm font-bold text-white">
+      <p className="animate-banner-drop flex max-w-xl items-center gap-3 rounded-control bg-shade px-4 py-3 text-sm font-bold text-white">
         {banner.sector && <GameImage src={ASSETS.sectorIcon(banner.sector)} alt="" width={24} className="shrink-0" />}
         <span>{banner.text}</span>
       </p>

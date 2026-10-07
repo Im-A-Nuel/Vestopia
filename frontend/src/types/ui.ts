@@ -39,6 +39,15 @@ export interface ZoomRequest {
   action: ZoomAction;
 }
 
+export type DayTheme = "day" | "night";
+
+export interface MapTree {
+  x: number;
+  y: number;
+  scale: number;
+  variant: number;
+}
+
 export type ConnectionStatus = "online" | "reconnecting";
 
 export interface Banner {
@@ -57,6 +66,8 @@ export interface VillageBridge {
   harvest: (stockId: StockId) => void;
   reportError: () => void;
   subscribeZoom: (listener: (action: ZoomAction) => void) => () => void;
+  getTheme: () => DayTheme;
+  subscribeTheme: (listener: (theme: DayTheme) => void) => () => void;
 }
 
 export interface ActivityEntry {

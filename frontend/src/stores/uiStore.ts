@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
   Banner,
+  DayTheme,
   BankTab,
   Dialogue,
   DialogueAction,
@@ -26,6 +27,8 @@ interface UiState {
   banner: Banner | null;
   seenTips: TipId[];
   zoomRequest: ZoomRequest | null;
+  theme: DayTheme;
+  toggleTheme: () => void;
   requestZoom: (action: ZoomAction) => void;
   openShop: (focus?: ShopFocus) => void;
   openBank: (tab?: BankTab, loanMode?: LoanMode) => void;
@@ -57,6 +60,8 @@ export const useUiStore = create<UiState>()(
       banner: null,
       seenTips: [],
       zoomRequest: null,
+      theme: "day",
+      toggleTheme: () => set({ theme: get().theme === "day" ? "night" : "day" }),
       requestZoom: (action) => set({ zoomRequest: { id: nextId(), action } }),
       openShop: (focus = {}) => set({ panel: "shop", shopFocus: focus }),
       openBank: (tab = "collateral", loanMode = "borrow") => set({ panel: "bank", bankTab: tab, loanMode }),
@@ -76,6 +81,6 @@ export const useUiStore = create<UiState>()(
         return true;
       },
     }),
-    { name: "vestopia.ui", partialize: (state) => ({ seenTips: state.seenTips }) },
+    { name: "vestopia.ui", partialize: (state) => ({ seenTips: state.seenTips, theme: state.theme }) },
   ),
 );

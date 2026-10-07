@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito, Press_Start_2P } from "next/font/google";
 import { Toaster } from "sonner";
+import { ThemeController } from "@/components/pages/(shared)";
 import "./globals.css";
 
 const uiFont = Nunito({
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${uiFont.variable} ${pixelFont.variable} h-full`}>
       <body className="min-h-full bg-default text-ink">
+        <ThemeController />
         {children}
         <Toaster
           position="bottom-right"

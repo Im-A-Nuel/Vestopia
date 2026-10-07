@@ -3,3 +3,4 @@ export * from "./Hud";
 export * from "./LocationBar";
 export * from "./MapControls";
 export * from "./NpcDialogue";
+export * from "./ThemeToggle";
