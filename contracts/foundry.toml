@@ -16,3 +16,8 @@ monad_testnet = "${MONAD_TESTNET_RPC_URL}"
 # Intentional: block.timestamp for oracle staleness, partial oracle tuple reads, oracle/stock calls in
 # bounded loops, and checks-effects-interactions ordering with nonReentrant on trusted protocol tokens.
 exclude_lints = ["block-timestamp", "unused-return", "require-revert-in-loop", "calls-loop", "reentrancy-no-eth", "reentrancy-events", "costly-loop", "screaming-snake-case-immutable", "unsafe-cheatcode", "named-struct-fields"]
+
+[invariant]
+runs = 64
+depth = 100
+fail_on_revert = false
