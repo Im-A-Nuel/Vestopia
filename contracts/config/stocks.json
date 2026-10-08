@@ -1,0 +1,322 @@
+{
+  "sectors": [
+    "tech",
+    "media",
+    "retail",
+    "consumer",
+    "agri",
+    "commodity"
+  ],
+  "stocks": [
+    {
+      "id": "aapl",
+      "ticker": "AAPL",
+      "name": "Apple",
+      "symbol": "sAAPL",
+      "sector": 0,
+      "sectorId": "tech",
+      "basePrice": 230,
+      "dividendRateBps": 100
+    },
+    {
+      "id": "nvda",
+      "ticker": "NVDA",
+      "name": "Nvidia",
+      "symbol": "sNVDA",
+      "sector": 0,
+      "sectorId": "tech",
+      "basePrice": 140,
+      "dividendRateBps": 50
+    },
+    {
+      "id": "msft",
+      "ticker": "MSFT",
+      "name": "Microsoft",
+      "symbol": "sMSFT",
+      "sector": 0,
+      "sectorId": "tech",
+      "basePrice": 430,
+      "dividendRateBps": 80
+    },
+    {
+      "id": "amd",
+      "ticker": "AMD",
+      "name": "AMD",
+      "symbol": "sAMD",
+      "sector": 0,
+      "sectorId": "tech",
+      "basePrice": 160,
+      "dividendRateBps": 0
+    },
+    {
+      "id": "avgo",
+      "ticker": "AVGO",
+      "name": "Broadcom",
+      "symbol": "sAVGO",
+      "sector": 0,
+      "sectorId": "tech",
+      "basePrice": 170,
+      "dividendRateBps": 130
+    },
+    {
+      "id": "intc",
+      "ticker": "INTC",
+      "name": "Intel",
+      "symbol": "sINTC",
+      "sector": 0,
+      "sectorId": "tech",
+      "basePrice": 22,
+      "dividendRateBps": 200
+    },
+    {
+      "id": "csco",
+      "ticker": "CSCO",
+      "name": "Cisco",
+      "symbol": "sCSCO",
+      "sector": 0,
+      "sectorId": "tech",
+      "basePrice": 55,
+      "dividendRateBps": 300
+    },
+    {
+      "id": "nem",
+      "ticker": "NEM",
+      "name": "Newmont",
+      "symbol": "sNEM",
+      "sector": 5,
+      "sectorId": "commodity",
+      "basePrice": 55,
+      "dividendRateBps": 400
+    },
+    {
+      "id": "xom",
+      "ticker": "XOM",
+      "name": "Exxon Mobil",
+      "symbol": "sXOM",
+      "sector": 5,
+      "sectorId": "commodity",
+      "basePrice": 115,
+      "dividendRateBps": 500
+    },
+    {
+      "id": "cat",
+      "ticker": "CAT",
+      "name": "Caterpillar",
+      "symbol": "sCAT",
+      "sector": 5,
+      "sectorId": "commodity",
+      "basePrice": 360,
+      "dividendRateBps": 160
+    },
+    {
+      "id": "ko",
+      "ticker": "KO",
+      "name": "Coca-Cola",
+      "symbol": "sKO",
+      "sector": 3,
+      "sectorId": "consumer",
+      "basePrice": 70,
+      "dividendRateBps": 500
+    },
+    {
+      "id": "pg",
+      "ticker": "PG",
+      "name": "Procter & Gamble",
+      "symbol": "sPG",
+      "sector": 3,
+      "sectorId": "consumer",
+      "basePrice": 165,
+      "dividendRateBps": 400
+    },
+    {
+      "id": "wmt",
+      "ticker": "WMT",
+      "name": "Walmart",
+      "symbol": "sWMT",
+      "sector": 3,
+      "sectorId": "consumer",
+      "basePrice": 80,
+      "dividendRateBps": 120
+    },
+    {
+      "id": "cost",
+      "ticker": "COST",
+      "name": "Costco",
+      "symbol": "sCOST",
+      "sector": 3,
+      "sectorId": "consumer",
+      "basePrice": 900,
+      "dividendRateBps": 60
+    },
+    {
+      "id": "de",
+      "ticker": "DE",
+      "name": "John Deere",
+      "symbol": "sDE",
+      "sector": 4,
+      "sectorId": "agri",
+      "basePrice": 480,
+      "dividendRateBps": 400
+    },
+    {
+      "id": "adm",
+      "ticker": "ADM",
+      "name": "Archer-Daniels-Midland",
+      "symbol": "sADM",
+      "sector": 4,
+      "sectorId": "agri",
+      "basePrice": 52,
+      "dividendRateBps": 500
+    },
+    {
+      "id": "amzn",
+      "ticker": "AMZN",
+      "name": "Amazon",
+      "symbol": "sAMZN",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 190,
+      "dividendRateBps": 0
+    },
+    {
+      "id": "ebay",
+      "ticker": "EBAY",
+      "name": "eBay",
+      "symbol": "sEBAY",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 60,
+      "dividendRateBps": 180
+    },
+    {
+      "id": "gme",
+      "ticker": "GME",
+      "name": "GameStop",
+      "symbol": "sGME",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 25,
+      "dividendRateBps": 0
+    },
+    {
+      "id": "hd",
+      "ticker": "HD",
+      "name": "Home Depot",
+      "symbol": "sHD",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 380,
+      "dividendRateBps": 250
+    },
+    {
+      "id": "mcd",
+      "ticker": "MCD",
+      "name": "McDonald's",
+      "symbol": "sMCD",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 290,
+      "dividendRateBps": 240
+    },
+    {
+      "id": "nke",
+      "ticker": "NKE",
+      "name": "Nike",
+      "symbol": "sNKE",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 75,
+      "dividendRateBps": 200
+    },
+    {
+      "id": "sbux",
+      "ticker": "SBUX",
+      "name": "Starbucks",
+      "symbol": "sSBUX",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 95,
+      "dividendRateBps": 250
+    },
+    {
+      "id": "tsla",
+      "ticker": "TSLA",
+      "name": "Tesla",
+      "symbol": "sTSLA",
+      "sector": 2,
+      "sectorId": "retail",
+      "basePrice": 250,
+      "dividendRateBps": 0
+    },
+    {
+      "id": "dis",
+      "ticker": "DIS",
+      "name": "Disney",
+      "symbol": "sDIS",
+      "sector": 1,
+      "sectorId": "media",
+      "basePrice": 100,
+      "dividendRateBps": 100
+    },
+    {
+      "id": "googl",
+      "ticker": "GOOGL",
+      "name": "Alphabet",
+      "symbol": "sGOOGL",
+      "sector": 1,
+      "sectorId": "media",
+      "basePrice": 165,
+      "dividendRateBps": 50
+    },
+    {
+      "id": "meta",
+      "ticker": "META",
+      "name": "Meta",
+      "symbol": "sMETA",
+      "sector": 1,
+      "sectorId": "media",
+      "basePrice": 560,
+      "dividendRateBps": 40
+    },
+    {
+      "id": "nflx",
+      "ticker": "NFLX",
+      "name": "Netflix",
+      "symbol": "sNFLX",
+      "sector": 1,
+      "sectorId": "media",
+      "basePrice": 700,
+      "dividendRateBps": 0
+    },
+    {
+      "id": "rddt",
+      "ticker": "RDDT",
+      "name": "Reddit",
+      "symbol": "sRDDT",
+      "sector": 1,
+      "sectorId": "media",
+      "basePrice": 120,
+      "dividendRateBps": 0
+    },
+    {
+      "id": "spot",
+      "ticker": "SPOT",
+      "name": "Spotify",
+      "symbol": "sSPOT",
+      "sector": 1,
+      "sectorId": "media",
+      "basePrice": 450,
+      "dividendRateBps": 0
+    },
+    {
+      "id": "vz",
+      "ticker": "VZ",
+      "name": "Verizon",
+      "symbol": "sVZ",
+      "sector": 1,
+      "sectorId": "media",
+      "basePrice": 41,
+      "dividendRateBps": 650
+    }
+  ]
+}
