@@ -8,6 +8,10 @@ import {VillageMarket} from "./VillageMarket.sol";
 import {VillageBank} from "./VillageBank.sol";
 import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
 
+interface ISimOraclePrevious {
+    function getPreviousPrice(bytes32 priceId) external view returns (int128);
+}
+
 /// @notice Read-only aggregator: everything the UI needs for one player in a single call.
 /// @dev Level and sector unlock are computed here on every read and never stored.
 contract VillageLens {
@@ -28,12 +32,14 @@ contract VillageLens {
         string ticker;
         uint8 sector;
         int128 price; // 8 decimals, raw oracle value
+        int128 previousPrice; // price before the last update; 0 if the oracle cannot tell
         uint256 walletBal;
         uint256 collateralBal;
         uint256 value; // (walletBal + collateralBal) * price, in Koin
         uint256 collateralValue; // collateralBal * price, in Koin
         uint8 level; // 0 = empty lot, 1-3
         uint256 pendingHarvest;
+        uint256 costBasis; // Koin spent on the shares still held
     }
 
     struct SectorView {
@@ -102,6 +108,9 @@ contract VillageLens {
         s.sector = token.sector();
         (int128 price,,) = oracle.getPrice(token.priceId());
         s.price = price;
+        try ISimOraclePrevious(address(oracle)).getPreviousPrice(token.priceId()) returns (int128 prev) {
+            s.previousPrice = prev;
+        } catch {}
         s.walletBal = token.balanceOf(user);
         s.collateralBal = bank.collateralOf(user, address(token));
         if (price > 0) {
@@ -111,6 +120,7 @@ contract VillageLens {
         }
         s.level = _level(s.value);
         s.pendingHarvest = market.pendingHarvest(user, address(token));
+        s.costBasis = market.costBasis(user, address(token));
     }
 
     function _level(uint256 value) private pure returns (uint8) {

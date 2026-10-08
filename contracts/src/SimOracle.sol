@@ -13,6 +13,7 @@ contract SimOracle is IPriceOracle, Ownable {
     }
 
     mapping(bytes32 => Price) private _prices;
+    mapping(bytes32 => int128) private _previous;
 
     error LengthMismatch();
 
@@ -26,9 +27,17 @@ contract SimOracle is IPriceOracle, Ownable {
         return (p.price, p.updatedAt, p.updatedAt == 0 ? Session.UNKNOWN : Session.REGULAR);
     }
 
+    /// @notice Extra (not part of IPriceOracle): the price before the latest `setPrices`.
+    /// On the first set it equals the current price.
+    function getPreviousPrice(bytes32 priceId) external view returns (int128) {
+        return _previous[priceId];
+    }
+
     function setPrices(bytes32[] calldata ids, int128[] calldata prices) external onlyOwner {
         if (ids.length != prices.length) revert LengthMismatch();
         for (uint256 i = 0; i < ids.length; i++) {
+            Price memory old = _prices[ids[i]];
+            _previous[ids[i]] = old.updatedAt == 0 ? prices[i] : old.price;
             _prices[ids[i]] = Price(prices[i], SafeCast.toUint64(block.timestamp));
             emit PriceSet(ids[i], prices[i]);
         }

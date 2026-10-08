@@ -27,6 +27,12 @@ contract VillageMarket is AccessControl {
     mapping(address => bool) public starterClaimed;
     mapping(address => mapping(address => uint256)) public pendingHarvest;
 
+    /// @notice Koin the player spent on shares still held (average-cost basis), per stock.
+    mapping(address => mapping(address => uint256)) public costBasis;
+    /// @dev Shares bought through `buy` that `costBasis` still covers. Deposits/withdrawals to the Bank do not
+    ///      change it, so the basis follows the whole position (wallet + collateral).
+    mapping(address => mapping(address => uint256)) private _costShares;
+
     error AlreadyClaimed();
     error NotListed();
     error AlreadyListed();
@@ -86,6 +92,8 @@ contract VillageMarket is AccessControl {
         if (sharesOut == 0) revert ZeroAmount();
         koin.burn(msg.sender, koinIn);
         stock.mint(msg.sender, sharesOut);
+        costBasis[msg.sender][address(stock)] += koinIn;
+        _costShares[msg.sender][address(stock)] += sharesOut;
         emit Bought(msg.sender, address(stock), koinIn, sharesOut);
     }
 
@@ -95,6 +103,7 @@ contract VillageMarket is AccessControl {
         uint256 price = _price(stock);
         koinOut = (shares * price) / PRICE_SCALE;
         stock.burn(msg.sender, shares);
+        _reduceBasis(address(stock), shares);
         if (koinOut > 0) koin.mint(msg.sender, koinOut);
         emit Sold(msg.sender, address(stock), shares, koinOut);
     }
@@ -137,6 +146,20 @@ contract VillageMarket is AccessControl {
     }
 
     // --------------------------------------------------------------- internal
+
+    /// @dev Removes the sold fraction of the basis. Selling shares that were not bought here (e.g. won in a
+    ///      liquidation) clears the remaining basis rather than underflowing.
+    function _reduceBasis(address stock, uint256 sold) private {
+        uint256 tracked = _costShares[msg.sender][stock];
+        if (sold >= tracked) {
+            costBasis[msg.sender][stock] = 0;
+            _costShares[msg.sender][stock] = 0;
+            return;
+        }
+        uint256 basis = costBasis[msg.sender][stock];
+        costBasis[msg.sender][stock] = basis - (basis * sold) / tracked;
+        _costShares[msg.sender][stock] = tracked - sold;
+    }
 
     function _collect(address stock) private returns (uint256 amount) {
         amount = pendingHarvest[msg.sender][stock];
