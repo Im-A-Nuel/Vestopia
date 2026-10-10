@@ -1,13 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { COPY, MARKET_EVENTS, POLL_INTERVAL_MS, STOCKS, getMarketEvent } from "@/config";
+import { COPY, EXPLORER_URL, GAME_BACKEND, MARKET_EVENTS, POLL_INTERVAL_MS, STOCKS, getMarketEvent } from "@/config";
 import { formatPercent, formatPrice } from "@/lib";
 import { useAdminStore } from "@/stores";
 
 type GateStatus = "checking" | "locked" | "verifying" | "open";
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
+
+const HEALTH_POLL_MS = 10000;
+
+const STALE_WARNING_SECONDS = 30 * 60;
+
+const formatAge = (seconds: number | null): string => {
+  if (seconds === null) return "Unknown";
+  if (seconds < 90) return `${Math.round(seconds)} s`;
+  if (seconds < 5400) return `${Math.round(seconds / 60)} min`;
+  return `${(seconds / 3600).toFixed(1)} h`;
+};
 
 const percentTone = (value: number): string => {
   if (Math.abs(value) < 0.05) return "text-soft";
@@ -25,6 +36,12 @@ export function AdminScreen() {
   const refresh = useAdminStore((state) => state.refresh);
   const trigger = useAdminStore((state) => state.trigger);
   const resetDemo = useAdminStore((state) => state.resetDemo);
+  const health = useAdminStore((state) => state.health);
+  const lastTxs = useAdminStore((state) => state.lastTxs);
+  const keepaliveBusy = useAdminStore((state) => state.keepaliveBusy);
+  const refreshHealth = useAdminStore((state) => state.refreshHealth);
+  const keepalive = useAdminStore((state) => state.keepalive);
+  const onChain = GAME_BACKEND === "chain";
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +67,15 @@ export function AdminScreen() {
     }, POLL_INTERVAL_MS);
     return () => window.clearInterval(interval);
   }, [gate, refresh]);
+
+  useEffect(() => {
+    if (gate !== "open" || !onChain) return;
+    void refreshHealth();
+    const interval = window.setInterval(() => {
+      if (!document.hidden) void refreshHealth();
+    }, HEALTH_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [gate, onChain, refreshHealth]);
 
   const unlock = useCallback(
     async (event: FormEvent<HTMLFormElement>): Promise<void> => {
@@ -168,6 +194,95 @@ export function AdminScreen() {
         </p>
       </section>
 
+      {onChain && (
+        <section aria-labelledby="chain-heading" className="flex flex-col gap-3">
+          <h2 id="chain-heading" className="text-lg font-extrabold">
+            Chain status
+          </h2>
+          <p className="text-sm font-bold">Safe order for a live demo: Keepalive first, then trigger events.</p>
+          {(health?.oraclePriceAgeSeconds ?? 0) >= STALE_WARNING_SECONDS && (
+            <p role="alert" className="rounded-control border border-caution p-3 text-sm font-bold text-caution">
+              Prices are older than 30 minutes. Press &quot;Keepalive now&quot; before triggering events, or borrowing
+              will stop working after 1 hour.
+            </p>
+          )}
+          <div className="panel flex flex-col gap-3 p-4">
+            {health ? (
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="label-text">Oracle price age</dt>
+                  <dd
+                    className={`font-extrabold ${
+                      (health.oraclePriceAgeSeconds ?? 0) >= STALE_WARNING_SECONDS ? "text-negative" : "text-positive"
+                    }`}
+                  >
+                    {formatAge(health.oraclePriceAgeSeconds)}
+                    {health.oracleStale ? " (stale: borrowing is blocked)" : ""}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="label-text">Latest event</dt>
+                  <dd className="font-extrabold">{latest ? getMarketEvent(latest.id).title : "None yet"}</dd>
+                </div>
+                <div>
+                  <dt className="label-text">Players registered</dt>
+                  <dd className="font-extrabold">{health.players}</dd>
+                </div>
+                <div>
+                  <dt className="label-text">Block</dt>
+                  <dd className="tabular font-extrabold">{health.block}</dd>
+                </div>
+                <div>
+                  <dt className="label-text">Admin wallet</dt>
+                  <dd className="tabular font-extrabold">
+                    {health.adminBalanceMon ? `${Number(health.adminBalanceMon).toFixed(3)} MON` : "Not configured"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="label-text">Gas faucet wallet</dt>
+                  <dd className="tabular font-extrabold">
+                    {health.dripBalanceMon ? `${Number(health.dripBalanceMon).toFixed(3)} MON` : "Not configured"}
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p role="status" className="text-sm text-soft">
+                Loading chain status...
+              </p>
+            )}
+            <button
+              type="button"
+              className="btn btn-secondary self-start"
+              disabled={keepaliveBusy || pendingId !== null}
+              onClick={() => void keepalive()}
+            >
+              {keepaliveBusy ? "Refreshing prices..." : "Keepalive now"}
+            </button>
+            <p className="text-xs text-soft">
+              Keepalive re-sends the current prices so they stay fresh. Prices older than 1 hour block borrowing.
+            </p>
+          </div>
+          {lastTxs.length > 0 && (
+            <div className="panel flex flex-col gap-1 p-4">
+              <h3 className="label-text">Last transactions</h3>
+              <ul className="flex flex-col gap-1 text-sm">
+                {lastTxs.map((tx) => (
+                  <li key={tx.hash} className="flex flex-wrap justify-between gap-3">
+                    <span>{tx.label}</span>
+                    <span className="tabular text-xs text-soft">
+                      gas {Number(tx.gasUsed).toLocaleString("en-US")} ·{" "}
+                      <a className="underline" href={`${EXPLORER_URL}/tx/${tx.hash}`} target="_blank" rel="noreferrer">
+                        {tx.hash.slice(0, 10)}...
+                      </a>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
+
       <section aria-labelledby="prices-heading" className="flex flex-col gap-3">
         <h2 id="prices-heading" className="text-lg font-extrabold">
           Current prices
@@ -239,11 +354,13 @@ export function AdminScreen() {
         {confirmingReset ? (
           <div role="alert" className="flex flex-col gap-2 rounded-control border border-caution p-3">
             <p className="text-sm font-bold text-caution">
-              This erases every village, price and event stored in this browser. This cannot be undone.
+              {onChain
+                ? "This puts every price back to its starting value on-chain. Player balances stay on-chain and cannot be erased."
+                : "This erases every village, price and event stored in this browser. This cannot be undone."}
             </p>
             <div className="flex gap-2">
               <button type="button" className="btn btn-caution flex-1" onClick={() => void wipe()}>
-                Erase demo data
+                {onChain ? "Reset prices" : "Erase demo data"}
               </button>
               <button type="button" className="btn btn-secondary" onClick={() => setConfirmingReset(false)}>
                 Cancel
@@ -252,7 +369,7 @@ export function AdminScreen() {
           </div>
         ) : (
           <button type="button" className="btn btn-secondary self-start" onClick={() => setConfirmingReset(true)}>
-            Reset demo data
+            {onChain ? "Reset prices to base" : "Reset demo data"}
           </button>
         )}
       </section>

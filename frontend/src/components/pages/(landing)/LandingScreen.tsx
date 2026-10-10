@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { APP_NAME, ASSETS, COPY } from "@/config";
+import { APP_NAME, ASSETS, COPY, GAME_BACKEND, PRIVY_ENABLED } from "@/config";
 import { useMounted } from "@/hooks";
+import type { ConnectorId } from "@/lib";
 import { useSessionStore } from "@/stores";
 import { GameImage } from "@/components/pages/(shared)";
 
@@ -24,10 +25,10 @@ export function LandingScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const start = async (): Promise<void> => {
+  const start = async (connectorId: ConnectorId = "injected"): Promise<void> => {
     setLoading(true);
     setError(null);
-    const result = await login();
+    const result = await login(connectorId);
     if (result.status === "error") {
       setError(result.message);
       toast.error(result.message);
@@ -57,6 +58,25 @@ export function LandingScreen() {
                 Sign out
               </button>
             </div>
+          ) : PRIVY_ENABLED ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={loading}
+                onClick={() => void start("privy")}
+              >
+                {loading ? "Signing in..." : "Sign in"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                disabled={loading}
+                onClick={() => void start("injected")}
+              >
+                Use browser wallet
+              </button>
+            </div>
           ) : (
             <button
               type="button"
@@ -64,7 +84,13 @@ export function LandingScreen() {
               disabled={loading}
               onClick={() => void start()}
             >
-              {loading ? "Signing in..." : "Start with Passkey"}
+              {loading
+                ? GAME_BACKEND === "chain"
+                  ? "Connecting..."
+                  : "Signing in..."
+                : GAME_BACKEND === "chain"
+                  ? "Connect wallet"
+                  : "Start with Passkey"}
             </button>
           )}
           <p role={error ? "alert" : undefined} className="min-h-5 text-sm text-negative">
@@ -82,7 +108,7 @@ export function LandingScreen() {
         </dl>
 
         <div className="flex flex-col gap-1 text-xs text-soft">
-          <p>{COPY.demoNotice}</p>
+          <p>{GAME_BACKEND === "chain" ? COPY.chainNotice : COPY.demoNotice}</p>
           <p>{COPY.disclaimer}</p>
         </div>
       </section>

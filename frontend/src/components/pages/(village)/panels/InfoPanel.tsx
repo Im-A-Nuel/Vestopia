@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { COPY } from "@/config";
+import { ADDRESSES, COPY, EXPLORER_URL, GAME_BACKEND } from "@/config";
 import { shortenAddress } from "@/lib";
 import { useGameStore, useSessionStore, useUiStore } from "@/stores";
 import { Modal } from "@/components/pages/(shared)";
@@ -53,15 +53,40 @@ export function InfoPanel() {
           <p className="tabular break-all text-sm font-bold" title={address ?? undefined}>
             {address ? shortenAddress(address) : "Not signed in"}
           </p>
-          <p className="text-sm text-soft">{COPY.demoNotice}</p>
-          <p className="text-sm text-soft">View on Explorer will be available after the contracts are deployed.</p>
+          <p className="text-sm text-soft">{GAME_BACKEND === "chain" ? COPY.chainNotice : COPY.demoNotice}</p>
+          {GAME_BACKEND === "chain" && address && (
+            <a
+              className="text-sm font-bold underline"
+              href={`${EXPLORER_URL}/address/${address}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View on Explorer
+            </a>
+          )}
         </section>
 
         <section className="flex flex-col gap-1">
           <h3 className="label-text">Contracts</h3>
-          <p className="text-sm text-soft">
-            This build runs on simulated data. Contract addresses will be listed here after deployment.
-          </p>
+          {GAME_BACKEND === "chain" ? (
+            <ul className="flex flex-col gap-1 text-sm">
+              {Object.entries(ADDRESSES).map(([name, contract]) => (
+                <li key={name} className="flex justify-between gap-3">
+                  <span className="capitalize">{name}</span>
+                  <a
+                    className="tabular underline"
+                    href={`${EXPLORER_URL}/address/${contract}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {shortenAddress(contract)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-soft">This demo runs on simulated data saved in your browser.</p>
+          )}
         </section>
 
         <section className="flex flex-col gap-2">
@@ -84,30 +109,31 @@ export function InfoPanel() {
           <button type="button" className="btn btn-secondary" onClick={signOut}>
             Sign out
           </button>
-          {confirmingReset ? (
-            <div role="alert" className="flex flex-col gap-2 rounded-control border border-caution p-3">
-              <p className="text-sm font-bold text-caution">
-                This erases every village, price and event stored in this browser. This cannot be undone.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-caution flex-1"
-                  disabled={resetting}
-                  onClick={() => void wipeDemo()}
-                >
-                  {resetting ? "Resetting..." : "Erase demo data"}
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={() => setConfirmingReset(false)}>
-                  Cancel
-                </button>
+          {GAME_BACKEND !== "chain" &&
+            (confirmingReset ? (
+              <div role="alert" className="flex flex-col gap-2 rounded-control border border-caution p-3">
+                <p className="text-sm font-bold text-caution">
+                  This erases every village, price and event stored in this browser. This cannot be undone.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-caution flex-1"
+                    disabled={resetting}
+                    onClick={() => void wipeDemo()}
+                  >
+                    {resetting ? "Resetting..." : "Erase demo data"}
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setConfirmingReset(false)}>
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <button type="button" className="btn btn-ghost" onClick={() => setConfirmingReset(true)}>
-              Reset demo data
-            </button>
-          )}
+            ) : (
+              <button type="button" className="btn btn-ghost" onClick={() => setConfirmingReset(true)}>
+                Reset demo data
+              </button>
+            ))}
         </div>
       </div>
     </Modal>

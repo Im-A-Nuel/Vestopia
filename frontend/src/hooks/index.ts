@@ -3,3 +3,4 @@ export * from "./useNarration";
 export * from "./useQuestProgress";
 export * from "./useReducedMotion";
 export * from "./useVillageSync";
+export * from "./useWalletSync";

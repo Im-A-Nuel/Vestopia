@@ -15,12 +15,38 @@ export type ActionErrorCode =
   | "unknown_stock"
   | "passkey_unsupported"
   | "unauthorized"
+  | "stale_price"
+  | "insufficient_gas"
+  | "no_wallet"
+  | "wrong_network"
+  | "wrong_account"
+  | "cancelled"
+  | "busy"
   | "unknown";
+
+export interface TxReport {
+  label: string;
+  hash: string;
+  gasUsed: string;
+}
+
+export interface ChainHealth {
+  chainId: number;
+  block: string;
+  adminBalanceMon: string | null;
+  dripBalanceMon: string | null;
+  oraclePriceAgeSeconds: number | null;
+  oracleStale: boolean;
+  players: number;
+  lastScannedBlock: number | null;
+  checkedAt: number;
+}
 
 export interface ActionResult {
   status: ActionStatus;
   message: string;
   code?: ActionErrorCode;
+  txs?: TxReport[];
 }
 
 export type MarketEventId =

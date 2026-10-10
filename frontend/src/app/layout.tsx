@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito, Press_Start_2P } from "next/font/google";
 import { AppToaster, ThemeController } from "@/components/pages/(shared)";
+import { PrivyRoot } from "@/components/providers";
 import { THEME_SCRIPT } from "./themeScript";
 import "./globals.css";
 
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full bg-default text-ink">
         <ThemeController />
         {children}
+        <PrivyRoot />
         <AppToaster />
       </body>
     </html>

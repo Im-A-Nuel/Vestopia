@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { create } from "zustand";
 import { COPY } from "@/config";
+import { friendlyMessage, subscribeTxPhase } from "@/lib";
 import { gameService } from "@/services";
 import type { ActionResult, ActivityEntry, Amount, ConnectionStatus, PlayerView, StockId } from "@/types";
 import { useSessionStore } from "./sessionStore";
@@ -13,8 +14,10 @@ interface GameState {
   player: PlayerView | null;
   status: LoadStatus;
   busy: boolean;
+  txPhase: string | null;
   activity: ActivityEntry[];
   connection: ConnectionStatus;
+  error: string | null;
   refresh: () => Promise<void>;
   reset: () => void;
   claimStarter: () => Promise<ActionResult>;
@@ -36,14 +39,20 @@ let activitySequence = 0;
 const unauthorized: ActionResult = { status: "error", code: "unauthorized", message: COPY.errors.generic };
 
 export const useGameStore = create<GameState>()((set, get) => {
+  subscribeTxPhase((txPhase) => set({ txPhase }));
+
   const refresh = async (): Promise<void> => {
     const address = useSessionStore.getState().address;
     if (!address) return;
     try {
       const player = await gameService.getPlayer(address);
-      set({ player, status: "ready", connection: "online" });
-    } catch {
-      set({ status: get().player ? "ready" : "error", connection: "reconnecting" });
+      set({ player, status: "ready", connection: "online", error: null });
+    } catch (error) {
+      set({
+        status: get().player ? "ready" : "error",
+        connection: "reconnecting",
+        error: friendlyMessage(error),
+      });
     }
   };
 
@@ -56,6 +65,7 @@ export const useGameStore = create<GameState>()((set, get) => {
   const run = async (action: PlayerAction, options: { notifySuccess: boolean }): Promise<ActionResult> => {
     const address = useSessionStore.getState().address;
     if (!address) return unauthorized;
+    if (get().busy) return { status: "error", code: "busy", message: COPY.errors.busy };
     set({ busy: true });
     try {
       const result = await action(address);
@@ -79,13 +89,15 @@ export const useGameStore = create<GameState>()((set, get) => {
     player: null,
     status: "idle",
     busy: false,
+    txPhase: null,
     activity: [],
     connection: "online",
+    error: null,
     refresh: async () => {
       if (get().status === "idle") set({ status: "loading" });
       await refresh();
     },
-    reset: () => set({ player: null, status: "idle", busy: false, activity: [], connection: "online" }),
+    reset: () => set({ player: null, status: "idle", busy: false, activity: [], connection: "online", error: null }),
     claimStarter: () => run((address) => gameService.claimStarter(address), { notifySuccess: false }),
     buy: (stockId, koinAmount) =>
       run((address) => gameService.buy(address, stockId, koinAmount), { notifySuccess: true }),

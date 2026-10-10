@@ -18,6 +18,8 @@ export const COPY = {
   harvestDay: "Harvest Day! Your companies paid dividends.",
   unlockedBanner: (district: string) => `New district unlocked: ${district}!`,
   relocked: (district: string) => `The ${district} is resting for now. Own shares again to reopen it.`,
+  chainNotice:
+    "Connected to Monad Testnet: your village is built from simulated tokens that live in your wallet. Test MON is needed for network fees.",
   demoNotice: "Demo mode: your passkey is simulated and your village is saved in this browser only.",
   explain: {
     borrowLimit: "You can borrow up to 50% of the value of the shares you put in collateral.",
@@ -39,6 +41,16 @@ export const COPY = {
     nothingToHarvest: "There is nothing to harvest here yet.",
     alreadyClaimed: "You already claimed your starter Coins.",
     unauthorized: "That password is not correct.",
+    network: "We can't reach Monad Testnet right now. Retrying...",
+    noWallet: "No wallet found. Install MetaMask or Rabby, then reload this page.",
+    wrongNetwork: "Your wallet is on a different network. Switch to Monad Testnet to continue.",
+    wrongAccount: "Your wallet switched to another account. Reconnect to keep playing.",
+    cancelled: "No problem, nothing was sent. You cancelled the request in your wallet.",
+    insufficientGas: "Your wallet needs a little MON to pay network fees on Monad Testnet.",
+    stalePrice: "Market prices are resting. Try again in a moment.",
+    busy: "Hold on, your last action is still going through.",
+    reverted: "The transaction was rejected by the network. Let's try again.",
+    connectFailed: "Could not connect to your wallet. Open it and try again.",
   },
 } as const;
 
