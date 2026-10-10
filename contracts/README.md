@@ -90,6 +90,74 @@ The script deploys everything, wires roles, lists every stock from `config/stock
 
 ABIs are in `abi/*.json` (regenerate: `forge inspect <Contract> abi --json > abi/<Contract>.json`).
 
+## Deployed on Monad testnet (chain id 10143)
+
+Deployed 2026-10-08 with `script/Deploy.s.sol`. Admin / oracle owner / `DIVIDEND_ADMIN`: `0x0a18fCB673099443CB8bA44AE7198529275b7c1f`.
+Full list (also every stock): `deployments/10143.json`. RPC: set `MONAD_TESTNET_RPC_URL` (default public RPC `https://testnet-rpc.monad.xyz`).
+Explorer links use `https://testnet.monadexplorer.com` (address pages).
+
+| Contract | Address | Explorer |
+|---|---|---|
+| Koin | `0x3C2374f069dcEf39e41A252C506D4c87602197d0` | [link](https://testnet.monadexplorer.com/address/0x3C2374f069dcEf39e41A252C506D4c87602197d0) |
+| SimOracle | `0xDAbf117371FCed6Ea2dfa53E36ee4a628cd2Cb69` | [link](https://testnet.monadexplorer.com/address/0xDAbf117371FCed6Ea2dfa53E36ee4a628cd2Cb69) |
+| VillageMarket | `0xC23E914D96cd03f0a4C0E8C1D4e2F495786AC72e` | [link](https://testnet.monadexplorer.com/address/0xC23E914D96cd03f0a4C0E8C1D4e2F495786AC72e) |
+| VillageBank | `0xddDD38381569556756F44176d0Dca3F9aA383787` | [link](https://testnet.monadexplorer.com/address/0xddDD38381569556756F44176d0Dca3F9aA383787) |
+| VillageLens | `0x2fDcE5C6C07C9b29857041F3d4126720BB4aab34` | [link](https://testnet.monadexplorer.com/address/0x2fDcE5C6C07C9b29857041F3d4126720BB4aab34) |
+
+<details><summary>31 stock tokens</summary>
+
+| Token | Address | Explorer |
+|---|---|---|
+| sAAPL | `0xB8b1c4e68B9a1322d7D00cb2c4bF0DC87f377F1a` | [link](https://testnet.monadexplorer.com/address/0xB8b1c4e68B9a1322d7D00cb2c4bF0DC87f377F1a) |
+| sADM | `0xcaFd05bb7b28f1488E1884249E4E8D1C435172Ab` | [link](https://testnet.monadexplorer.com/address/0xcaFd05bb7b28f1488E1884249E4E8D1C435172Ab) |
+| sAMD | `0x95176bde7D0253A85f86A030dD7064818e9Fc03e` | [link](https://testnet.monadexplorer.com/address/0x95176bde7D0253A85f86A030dD7064818e9Fc03e) |
+| sAMZN | `0x0D214dc7186a6A61b1Dd9C4B07589848b0Fbf381` | [link](https://testnet.monadexplorer.com/address/0x0D214dc7186a6A61b1Dd9C4B07589848b0Fbf381) |
+| sAVGO | `0x32a7BBD063255e5768386b84fd07D2F95EC6cB59` | [link](https://testnet.monadexplorer.com/address/0x32a7BBD063255e5768386b84fd07D2F95EC6cB59) |
+| sCAT | `0xDE958d9bE7Ae1896e8a248A18a46a10D0950eE9e` | [link](https://testnet.monadexplorer.com/address/0xDE958d9bE7Ae1896e8a248A18a46a10D0950eE9e) |
+| sCOST | `0x363771B2462a73f2C4Dba597eF5888aE1a4B246e` | [link](https://testnet.monadexplorer.com/address/0x363771B2462a73f2C4Dba597eF5888aE1a4B246e) |
+| sCSCO | `0x9429FbB044bcCA1B25A7F2fb2A7eC8c1468e9daB` | [link](https://testnet.monadexplorer.com/address/0x9429FbB044bcCA1B25A7F2fb2A7eC8c1468e9daB) |
+| sDE | `0x57ccd5c7c8d2aaAe34e9bD7082FB3977a9933b1f` | [link](https://testnet.monadexplorer.com/address/0x57ccd5c7c8d2aaAe34e9bD7082FB3977a9933b1f) |
+| sDIS | `0xffeAe0851f18Ab4ed388dd6aE549F6B62bB765f7` | [link](https://testnet.monadexplorer.com/address/0xffeAe0851f18Ab4ed388dd6aE549F6B62bB765f7) |
+| sEBAY | `0xb03f214a59116e957Ee0355b9509930C5279F199` | [link](https://testnet.monadexplorer.com/address/0xb03f214a59116e957Ee0355b9509930C5279F199) |
+| sGME | `0xFa14443d3F34907Af6332A3650484b9e89B35604` | [link](https://testnet.monadexplorer.com/address/0xFa14443d3F34907Af6332A3650484b9e89B35604) |
+| sGOOGL | `0x4734bb7728D851E9c44A7d9Ec53c1E8590A5ffdB` | [link](https://testnet.monadexplorer.com/address/0x4734bb7728D851E9c44A7d9Ec53c1E8590A5ffdB) |
+| sHD | `0xf5A40c76C488189f29D9b164A9825632436df269` | [link](https://testnet.monadexplorer.com/address/0xf5A40c76C488189f29D9b164A9825632436df269) |
+| sINTC | `0xc0Abf23480256caCe8211d4B8EE4335d7c47FD7B` | [link](https://testnet.monadexplorer.com/address/0xc0Abf23480256caCe8211d4B8EE4335d7c47FD7B) |
+| sKO | `0xaD5e86ea63Fa31BF03Fe1c1B743384989a252792` | [link](https://testnet.monadexplorer.com/address/0xaD5e86ea63Fa31BF03Fe1c1B743384989a252792) |
+| sMCD | `0x8e87bD8a4B4eF71affEba0492a8D189a60cECdD1` | [link](https://testnet.monadexplorer.com/address/0x8e87bD8a4B4eF71affEba0492a8D189a60cECdD1) |
+| sMETA | `0xf8228Bd04FEBbe0567F05eE21437C97A933dD59c` | [link](https://testnet.monadexplorer.com/address/0xf8228Bd04FEBbe0567F05eE21437C97A933dD59c) |
+| sMSFT | `0x5ebAD03e7A8De8362741eD1365891006d06bB75B` | [link](https://testnet.monadexplorer.com/address/0x5ebAD03e7A8De8362741eD1365891006d06bB75B) |
+| sNEM | `0x92c979287846C0CCe25eAebA3a8D545C8A70bf0A` | [link](https://testnet.monadexplorer.com/address/0x92c979287846C0CCe25eAebA3a8D545C8A70bf0A) |
+| sNFLX | `0x1Fc250Ce231BF30d5112F416519626FD01FDA5f0` | [link](https://testnet.monadexplorer.com/address/0x1Fc250Ce231BF30d5112F416519626FD01FDA5f0) |
+| sNKE | `0x0Af8bd7AF500705e556E8e0A472DA93B6eF235D1` | [link](https://testnet.monadexplorer.com/address/0x0Af8bd7AF500705e556E8e0A472DA93B6eF235D1) |
+| sNVDA | `0x658861b01C8c4e55fC2Ad2166Ed9FD5AD5395c05` | [link](https://testnet.monadexplorer.com/address/0x658861b01C8c4e55fC2Ad2166Ed9FD5AD5395c05) |
+| sPG | `0x3Be49a26Aa1eC93bE42E2471F45812450c59e2C1` | [link](https://testnet.monadexplorer.com/address/0x3Be49a26Aa1eC93bE42E2471F45812450c59e2C1) |
+| sRDDT | `0xF7c0DF7EA4d4d5Fd9AE4d6750738c5D4c7199f7b` | [link](https://testnet.monadexplorer.com/address/0xF7c0DF7EA4d4d5Fd9AE4d6750738c5D4c7199f7b) |
+| sSBUX | `0x0C46cD8E760e6A421e5AA2Ba12f53aA9d5fd7C5B` | [link](https://testnet.monadexplorer.com/address/0x0C46cD8E760e6A421e5AA2Ba12f53aA9d5fd7C5B) |
+| sSPOT | `0x2959c86c9E546eED739d51F711aAC5D58694318E` | [link](https://testnet.monadexplorer.com/address/0x2959c86c9E546eED739d51F711aAC5D58694318E) |
+| sTSLA | `0x4Eb528876294ec54431e8766e49D645a7e256Dc9` | [link](https://testnet.monadexplorer.com/address/0x4Eb528876294ec54431e8766e49D645a7e256Dc9) |
+| sVZ | `0x7F35097Dff09b9b8a0A48ef0D9a48cC051B717EB` | [link](https://testnet.monadexplorer.com/address/0x7F35097Dff09b9b8a0A48ef0D9a48cC051B717EB) |
+| sWMT | `0x1F222B070176b09Bb38cE2E55De971124e689247` | [link](https://testnet.monadexplorer.com/address/0x1F222B070176b09Bb38cE2E55De971124e689247) |
+| sXOM | `0x759B4519d48Ff868AD89871982bAFAD5Ece849b7` | [link](https://testnet.monadexplorer.com/address/0x759B4519d48Ff868AD89871982bAFAD5Ece849b7) |
+
+</details>
+
+## Refreshing oracle prices
+
+Prices older than 1 hour make `borrow`, `liquidate` and `withdraw` (with debt) revert. Keep them fresh with
+`config/set-prices.mjs` (needs Foundry's `cast`, Node, and `contracts/.env` with the oracle owner key):
+
+```bash
+node config/set-prices.mjs keepalive                  # re-send current prices (no change, refreshes the timestamp)
+node config/set-prices.mjs event NVDA:25 AAPL:10      # event preset: percent change from current on-chain price
+node config/set-prices.mjs event NEM:-40 XOM:-10
+node config/set-prices.mjs reset                      # back to config/prices.json (base prices)
+node config/set-prices.mjs reset --dry                # any command with --dry only prints the prices
+```
+
+One `setPrices` tx for all 31 stocks costs about 745k gas; a single-stock event about 54k. Run `keepalive` at least every hour
+(for example from cron or the server). `SimOracle.getPreviousPrice` keeps the price before each update, which the UI uses for price arrows.
+
 ## How to add a stock
 
 1. Add a row to `frontend/src/config/stocks.ts` (and a sector to `sectors.ts` if new).

@@ -1,9 +1,9 @@
 # Contracts progress
 
 ## 1. Status
-- **Stage 2 of 3 complete** (tests, coverage, README, ABIs). Waiting for approval before Stage 3 (testnet deploy).
-- Overall: **~85%** (only the Monad testnet deploy and smoke test remain).
-- Last update: 2026-10-08 01:56 UTC
+- **Stage 3 of 3 complete**: deployed to Monad testnet (10143) and smoke-tested on-chain.
+- Overall: **100%** of the planned deliverables.
+- Last update: 2026-10-08 (Stage 3)
 
 ## 2. Checklist
 - [x] Foundry skeleton, OpenZeppelin v5.1.0 + forge-std as submodules: `foundry.toml`, `.gitmodules`, `.env.example`, `.gitignore`
@@ -19,9 +19,10 @@
 - [x] README: `README.md`
 - [x] ABI export: `abi/{Koin,SimStock,SimOracle,VillageMarket,VillageBank,VillageLens}.json`
 - [x] This file: `PROGRESS.md`
-- [ ] Monad testnet deploy (Stage 3, needs approval)
-- [ ] On-chain smoke test with `cast` (Stage 3)
-- [ ] `deployments/10143.json` (Stage 3)
+- [x] Monad testnet deploy: `script/Deploy.s.sol` run with `--broadcast --slow` (71 txs, 0 failed)
+- [x] On-chain smoke test with `cast` from a throwaway wallet (all 12 steps OK, see 3b)
+- [x] `deployments/10143.json`
+- [x] Price helper: `config/set-prices.mjs` (keepalive / event / reset), documented in `README.md`
 
 ## 3. Test summary
 - `forge test`: **138 passed, 0 failed** (Tokens 16, Market 45, Bank 55, Lens 20, Deploy 1, Invariants 1 suite with 4 invariants).
@@ -32,6 +33,17 @@
   (Koin, SimOracle, SimStock, VillageBank, VillageLens, VillageMarket). The forge "Total" row is lower only because it counts the script and test mocks.
 - Gas (from `forge test --gas-report`, avg): buy ~136k, sell ~92k, deposit ~83k, withdraw ~94k, borrow ~131k, repay ~41k,
   liquidate ~119k, claimStarter ~97k, harvestAll ~90k. `getPlayer` ~139k avg with 3 stocks, **~1.15M max with 31 stocks** (read call only).
+
+## 3b. Testnet deploy and smoke test (Stage 3)
+- Chain id 10143. Deployer = admin = `0x0a18fCB673099443CB8bA44AE7198529275b7c1f`. Balance before: 11.56 MON. After the whole stage: about 6.15 MON.
+- Deploy: 71 transactions, 0 failed, 41.15M gas total, about 4.24 MON. The dry run had estimated 34.9M gas / 7.16 MON at max fee.
+- Smoke test (throwaway wallet, all OK), gas per action: fund 1 MON (21k), claimStarter (129k), buy 300 Koin of sAAPL (225k),
+  approve (53k), deposit all (149k), borrow 100 (469k), repay 100 (92k), withdraw all (110k), creditDividends 5 Koin (72k),
+  harvest (88k), sell 1 share (155k).
+- Health factor with 100 Koin debt on about 300 Koin collateral was 2.4. Final Koin 935 = 1000 - 300 + 100 - 100 + 5 + 230 (correct).
+- `Lens.getPlayer` on-chain returns correct fields (Koin, starterClaimed, AAPL level 1, cost basis about 70, previousPrice). `eth_estimateGas` says about 2.7M for it; it is a read, use `eth_call`.
+- `borrow` costs about 469k gas on-chain because it loops over all 31 listed stocks.
+- Price helper tested live: keepalive (31 prices, 743k gas), event AAPL +10 percent (54k gas), reset to base (746k gas). Prices were left at base values.
 
 ## 4. Decisions log
 - Sector ids follow the frontend order (tech 0, media 1, retail 2, consumer 3, agri 4, commodity 5), not the spec enum. Reason: frontend wins.
@@ -66,16 +78,19 @@
 - A stale oracle blocks borrow, liquidation and (with debt) withdraw. The server must keep prices fresh (< 1 hour), e.g. a periodic `setPrices`.
 - No bad-debt handling after a deep crash.
 - Liquidation seizes one chosen stock; the liquidator must choose a stock the user holds enough of.
-- Monad testnet RPC behaviour (rate limits, gas estimates) is untested until Stage 3.
+- Monad charges the gas *limit*, not gas used; foundry's estimates worked on testnet. The public RPC may rate-limit heavy polling.
+- `contracts/.env` had Windows (CRLF) line endings. Plain `source .env` breaks the values; strip `\r` (the helper script already does). Deployer key = admin key (one wallet), so keep it safe.
+- `deployments/10143.json` has an extra `stocks._count` key; ignore it (the other keys are tickers).
+- Prices are at base values now but go stale 1 hour after the last update. Run `node config/set-prices.mjs keepalive` regularly.
 - Working tree note: ~144 files outside `contracts/` show as modified in `git status`, but `git diff --ignore-cr-at-eol` is empty, so these are line-ending (CRLF) differences that existed before this work. Nothing under `frontend/` was edited by the contracts work.
 - Early in Stage 2 I mistakenly ran `git config core.filemode core.autocrlf`, which set a bad value in `.git/config`. I fixed it with `git config core.filemode false` (the repo has `symlinks=false`, `ignorecase=true`, so it was most likely `false` before). Please check `.git/config` if filemode matters to you.
 - Stage 1 and early Stage 2 commits were made on `feat/contracts` before the "no git writes" rule. Uncommitted after `c08d896`: `test/Invariants.t.sol`, `test/Deploy.t.sol`, `abi/`, `README.md` (rewritten), `PROGRESS.md`, and the `[invariant]` block in `foundry.toml`.
 
 ## 7. Open questions for the orchestrator
-1. Strict stale rule on `withdraw` even with no debt? (Current: allowed with no debt.)
-2. Who keeps prices fresh on testnet (a cron calling `setPrices` at least every hour)?
-3. Stage 3: which admin address should own the oracle and `DIVIDEND_ADMIN` (the server key)? Provide `PRIVATE_KEY` and `ADMIN_ADDRESS` by env.
-4. Should `harvestAndReplant` (optional in spec) be added? Not built.
+1. (answered) Stale withdraw with no debt is allowed.
+2. Who runs `keepalive` every hour (cron or the server)? Not automated yet.
+3. Should the admin key be separate from the deployer key before a public demo? Currently one wallet.
+4. `harvestAndReplant`: skipped as decided.
 
 ## 8. Handoff notes for the frontend agent
 
@@ -137,5 +152,10 @@ Token balance errors are standard ERC-20 `ERC20InsufficientBalance` / `ERC20Insu
 3. `amount = value * dividendRateBps / 10000` (rates in `contracts/config/stocks.json`). 4. `Market.creditDividends(stock, players, amounts)` once per stock, skipping zero amounts.
 Keep prices fresh: call `setPrices` at least once an hour or borrow/liquidate will revert with `StalePrice`.
 
-### Addresses
-After Stage 3 they will be in `contracts/deployments/10143.json` (`koin, oracle, market, bank, lens, stocks{TICKER: address}`).
+### Network and addresses
+- Chain id **10143** (Monad testnet). RPC: `https://testnet-rpc.monad.xyz` (or your own `MONAD_TESTNET_RPC_URL`). Explorer: `https://testnet.monadexplorer.com`.
+- Addresses: `contracts/deployments/10143.json` (`koin, oracle, market, bank, lens, admin, stocks{TICKER: address}`).
+  Koin `0x3C2374f069dcEf39e41A252C506D4c87602197d0`, Market `0xC23E914D96cd03f0a4C0E8C1D4e2F495786AC72e`, Bank `0xddDD38381569556756F44176d0Dca3F9aA383787`, Lens `0x2fDcE5C6C07C9b29857041F3d4126720BB4aab34`, Oracle `0xDAbf117371FCed6Ea2dfa53E36ee4a628cd2Cb69`.
+- ABIs: `contracts/abi/{Koin,SimStock,SimOracle,VillageMarket,VillageBank,VillageLens}.json`. Use the `SimStock` ABI for every stock token.
+- Stock tokens are named `s<TICKER>` (for example `sAAPL`); Lens `stocks[i].ticker` is the bare ticker.
+- Keep prices fresh: `node config/set-prices.mjs keepalive` (see README).
